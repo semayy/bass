@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BASS Motion Graphic Senaryo - Flat & Futuristik</title>
+    <title>BASS Motion Graphic Senaryo - TR/EN Dil Desteği</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,348 +77,120 @@
             border: 1px solid var(--color-border);
             background-color: #0f172a; /* Zemin rengi ile kontrast */
         }
-        .correction-area textarea {
-            background-color: #020617; /* Siyah tonu */
-            border-color: var(--color-border);
-            color: var(--color-text-light);
+        
+        /* Dil Butonu Stili */
+        #lang-toggle {
+            background-color: var(--color-bg-card);
+            color: var(--color-primary);
+            border: 1px solid var(--color-primary);
         }
-        .correction-area textarea:focus {
-            border-color: var(--color-secondary);
-            box-shadow: 0 0 0 1px var(--color-secondary);
+        #lang-toggle:hover {
+            background-color: var(--color-primary);
+            color: var(--color-bg-card);
         }
     </style>
     
-    <!-- Firebase CDN'leri -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global Firebase değişkenlerini tanımlama
-        window.firebaseApp = null;
-        window.db = null;
-        window.auth = null;
-        window.userId = null;
-        window.appId = null;
-
-        // Firebase başlatma ve kimlik doğrulama işlevi
-        async function initializeFirebase() {
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-            window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-bass-app-id';
-
-            if (firebaseConfig) {
-                try {
-                    window.firebaseApp = initializeApp(firebaseConfig);
-                    window.db = getFirestore(window.firebaseApp);
-                    window.auth = getAuth(window.firebaseApp);
-                    
-                    await setPersistence(window.auth, browserLocalPersistence);
-
-                    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                    
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(window.auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(window.auth);
-                    }
-
-                    window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
-                    console.log("Firebase Başarılı. Kullanıcı ID:", window.userId);
-                    
-                } catch (error) {
-                    console.error("Firebase başlatma hatası:", error);
-                    window.userId = 'anon_local_error';
-                }
-            } else {
-                 console.warn("Firebase config bulunamadı. Not kaydetme devre dışı.");
-                 window.userId = 'anon_local';
-            }
-        }
-
-        // Notu Kaydetme İşlevi (Firestore)
-        window.saveNote = async (sceneId) => {
-            const noteTextarea = document.getElementById(`notes-${sceneId}`);
-            const saveButton = document.getElementById(`save-btn-${sceneId}`);
-            const statusIndicator = document.getElementById(`status-${sceneId}`);
-            const noteText = noteTextarea.value.trim();
-
-            // *** Düzeltme: Oturum açma mesajı daha açıklayıcı hale getirildi. ***
-            if (!window.db || !window.userId || window.userId.includes('anon_local')) {
-                statusIndicator.textContent = "Kaydedilemiyor: Anonim/Çevrimdışı Mod (Veri Kalıcı Kaydedilmez).";
-                statusIndicator.classList.remove('hidden', 'text-[var(--color-secondary)]');
-                statusIndicator.classList.add('text-red-500');
-                saveButton.disabled = true; // Anonim modda kaydetme butonunu devre dışı bırak
-                return;
-            }
-
-            if (noteText === '') {
-                statusIndicator.textContent = "Hata: Not alanı boş.";
-                statusIndicator.classList.remove('hidden', 'text-[var(--color-secondary)]');
-                statusIndicator.classList.add('text-red-500');
-                return;
-            }
-
-            saveButton.disabled = true;
-            statusIndicator.textContent = "Kaydediliyor...";
-            statusIndicator.classList.remove('hidden', 'text-red-500');
-            statusIndicator.classList.add('text-[var(--color-secondary)]');
-
-            try {
-                const docRefPath = `/artifacts/${window.appId}/users/${window.userId}/scene_notes/${sceneId}`;
-                const docRef = doc(window.db, docRefPath);
-
-                await setDoc(docRef, {
-                    note: noteText,
-                    sceneId: sceneId,
-                    userId: window.userId,
-                    timestamp: serverTimestamp()
-                });
-
-                statusIndicator.textContent = "BAŞARILI: Not kaydedildi. ✔";
-                statusIndicator.classList.remove('text-red-500');
-                statusIndicator.classList.add('text-[var(--color-secondary)]');
-
-            } catch (e) {
-                console.error("Not kaydederken hata oluştu: ", e);
-                statusIndicator.textContent = "HATA: Kayıt sırasında bir sorun oluştu.";
-                statusIndicator.classList.remove('text-[var(--color-secondary)]');
-                statusIndicator.classList.add('text-red-500');
-            } finally {
-                saveButton.disabled = false;
-                setTimeout(() => {
-                    statusIndicator.classList.add('hidden');
-                }, 3000);
-            }
-        };
-
-        // Notu Yükleme İşlevi (Firestore)
-        window.loadNote = async (sceneId) => {
-            const noteTextarea = document.getElementById(`notes-${sceneId}`);
-            if (!noteTextarea) return;
-
-            if (!window.db || !window.userId || window.userId.includes('anon_local')) {
-                noteTextarea.value = "Çevrimdışı Mod: Notlar kalıcı olarak kaydedilemez. Lütfen Notu Kaydet butonuna basmayı deneyin.";
-                return;
-            }
-
-            try {
-                const docRefPath = `/artifacts/${window.appId}/users/${window.userId}/scene_notes/${sceneId}`;
-                const docRef = doc(window.db, docRefPath);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    noteTextarea.value = docSnap.data().note || '';
-                } else {
-                    noteTextarea.value = '';
-                }
-            } catch (e) {
-                console.error(`Not yüklenirken hata oluştu (Sahne ${sceneId}): `, e);
-                noteTextarea.value = "Hata: Not yüklenemedi.";
-            }
-        };
-        
-        window.initializeFirebase = initializeFirebase;
-
-    </script>
-    
     <script>
-        // Senaryo Verileri (İkonlar Flat ve Modern Unicode'a çevrildi)
-        const scenes = [
-            {
-                id: 1, 
-                title: 'Giriş: Küresel Yetkinlik (ONES Tech)', 
-                description: 'Dünya haritası üzerinde parlayan çeşitli uluslararası proje noktaları gösterilir (Afrika, Asya, Orta Doğu). Büyük bir metin belirir: "ONES Technology: Global Güvenlik Çözümleri. 10+ Ülkede Başarılı Uygulama. Kanıtlanmış Biyometrik Entegrasyon Uzmanlığı." Bu, Irak projesi için güçlü bir temel oluşturur.', 
-                icon: '❖', // Flat Global Connection
-                storyboard: '3D, fütüristik dünya haritası üzerinde mavi ve yeşil ışıklarla parlayan, aktif proje bölgelerini gösteren bağlantı noktaları. Kamera haritadan Irak/Orta Doğu bölgesine doğru zoom yapar.'
+        // --- Çeviri Verisi (TR ve EN) ---
+        const translations = {
+            tr: {
+                main_title: "BASS MOTION GRAPHIC SENARYO",
+                subtitle: "ÜRETİM KONTROL PANELİ | ONES & BIOAFFIX",
+                menu_title: "MİSYON AKIŞI",
+                content_title: "SENARYO KONTROL VE REVİZYON",
+                metin_title: "METİN & İÇERİK:",
+                gorsel_title: "GÖRSEL NOT (STORYBOARD):",
+                sure_title: "Önerilen Süre: 3.5 - 4.5 sn",
+                segment_prefix: "SEGMENT",
+                scenes: [
+                    { id: 1, title: 'Giriş: Küresel Yetkinlik (ONES Tech)', description: 'Dünya haritası üzerinde parlayan çeşitli uluslararası proje noktaları gösterilir (Afrika, Asya, Orta Doğu). Büyük bir metin belirir: "ONES Technology: Global Güvenlik Çözümleri. 10+ Ülkede Başarılı Uygulama. Kanıtlanmış Biyometrik Entegrasyon Uzmanlığı." Bu, Irak projesi için güçlü bir temel oluşturur.', storyboard: '3D, fütüristik dünya haritası üzerinde mavi ve yeşil ışıklarla parlayan, aktif proje bölgelerini gösteren bağlantı noktaları. Kamera haritadan Irak/Orta Doğu bölgesine doğru zoom yapar.' },
+                    { id: 2, title: 'Açılış: Finansal Anomali (İsraf)', description: 'Foodstuff Genel Şirketi\'nin binası gösterilir. Binadan yayılan "USD/Dinar" banknotlar, havaya dağılarak kaybolur. Kayıp ve israfın dramatik görseli. Ses: Yüksek gerilim tonları.', storyboard: 'Foodstuff Genel Şirketi\'nin modern bir binasının havadan görünümü. Binadan çıkan banknotlar havada dağılarak kaybolur. Kamera, kaybolan parayı takip eder.' },
+                    { id: 3, title: 'Veri Analizi: Kayıp Raporu', description: 'Kaybolan paranın üzerinde istatistikler belirir: "Yıllık Harcama: ~3-4 Milyar USD". Vurgu: "Sistemdeki %10-20\'lik Kayıp yüz milyonlarca USD\'ye eşdeğerdir. Anomali tespit edildi." Rakamlar kırmızı renkte yanıp söner.', storyboard: 'Kırmızı ve tehlike belirten istatistikler (3-4 Milyar USD, %10-20 Kayıp) bir arayüzde yanıp söner. Rakamlar, grafik üzerinde keskin bir düşüş gösterir.' },
+                    { id: 4, title: 'Çözüm Aktivasyonu: Secure PDS', description: 'Kayıp noktasında parlak, yeşil bir ışık parlar ve "Secure PDS Biometric Authentication" simgesi ortaya çıkar. ONES Technology ve BioAffix markaları birleşir. Ses: Sistemin başlatılması.', storyboard: 'Kaostan, ONES ve BioAffix logolarının yeşil bir enerji dalgasıyla birleştiği, temiz, keskin bir logo animasyonu çıkar. Tüm ekranı kaplayan güven hissi.' },
+                    { id: 5, title: 'Tedarik Kapsülü Girişi (Liman)', description: 'Güneşli, turkuaz bir deniz kıyısında büyük bir kargo gemisi limana yanaşır. Konteynerler (Un, Şeker) indirilir. Finansal kaybın, somut yaşam destek ünitelerine dönüştüğü animasyonla gösterilir.', storyboard: 'Deniz kenarındaki modern bir liman. "Un" yazılı devasa konteynerler taşıyan gemi yanaşır. Kaybolan banknotların ürünlere (Un çuvalı) dönüştüğü soyut bir dönüşüm efekti.' },
+                    { id: 6, title: 'Mobil Otantikasyon: Birinci Kontrol Noktası', description: 'Liman görevlisi, "BioAffix Vision Mobile" cihazıyla şoförün biyometrik kimliğini ve yüz profilini tarar. Ekranda yeşil onay kodu belirir. "Yararlanıcının Biyometrik Doğrulaması Tamamlandı" mesajı.', storyboard: 'Yakın çekim: Yöneticinin elindeki BioAffix mobil cihazı. Ekranda şoförün yüzü taranırken yeşil bir biyometrik ızgara belirir. Onaylandıktan sonra yeşil "OK" işareti yanıp söner.' },
+                    { id: 7, title: 'Dijital İrsaliye Gönderimi', description: 'Doğrulamanın ardından, cihaz ekranında dijital irsaliye kodu ve yük bilgileri görünür. "Kağıt Protokolü Kapatıldı. Belgeler Dijital Ortama Aktarıldı. Elektronik Envanter Takip Sistemi (EETS) Aktif." vurgusu.', storyboard: 'Mobil cihaz ekranından zoom out. Ekran, kağıt yığınlarının hızla dijital bir veri akışına dönüştüğünü gösterir. EETS logosu, bu dijital akışın üzerine yerleşir.' },
+                    { id: 8, title: 'Taşıma Vektörünün İzlenmesi', description: 'Yüklü kamyonlar limandan ayrılır. Her kamyonun üzerinde bir GPS sinyali belirir ve merkezi bir haritaya kilitlenir. "Dağıtım Temsilcileri Merkez Kontrol Biriminden Anlık İzleniyor."', storyboard: 'Liman çıkış kapısından ayrılan kamyonlar dizisi. Bir uydu sinyali kamyonların üzerinden fırlar ve merkezi bir harita/izleme ekranına bağlanır.' },
+                    { id: 9, title: 'Ana Dağıtım İstasyonu', description: 'Kamyon konvoyunun, modern ve organize bir merkezi dağıtım deposuna (İstasyon) ulaştığı gösterilir. İstasyonun verimliliği ve kapasitesi vurgulanır.', storyboard: 'Geniş bir açı: Kamyon konvoyunun, temiz ve büyük bir ana depolama tesisine (İstasyon) ulaştığı görseli. Deponun düzenli ve organize yapısı vurgulanır.' },
+                    { id: 10, title: 'Merkezi Yönetim (MYS) İşleme', description: 'Kontrol odasındaki büyük ekranda, MYS yazılım arayüzü görünür. "Merkezi Yönetim Sistemi (MYS) ile Vekillere Yönlendirilecek Ürün Miktarları Onaylanıyor. Optimizasyon Hesaplandı." Veri akışı görselleştirilir.', storyboard: 'Kontrol odasındaki bir personelin önündeki devasa MYS ekranına yakın çekim. Ekranda, farklı vekil bölgelerine tahsis edilen ürün miktarları yeşil onay tuşlarıyla birlikte belirir.' },
+                    { id: 11, title: 'Güvenli Sevkiyat: Çift Otantikasyon', description: 'Kamyon şoförü ve sevkiyat memuru, BioAffix cihazına parmak izi/iris taraması yapar. Kimlik doğrulamasının güvenli, iki faktörlü yapısı vurgulanır. Kamyon, onay sonrası yola çıkar.', storyboard: 'Kamyon kabininde, şoför ve memurun sırayla BioAffix cihazına parmak izi okuttuğu yakın çekim. Her iki biyometrik onayın da başarılı olduğunu gösteren yeşil bir kilit animasyonu.' },
+                    { id: 12, title: 'Vekil Terminaline Giriş', description: 'Kamyon, dar ve canlı şehir sokaklarından geçerek yerel bir vekil noktasına (Dağıtım Terminali) ulaşır. Kentsel doku ile yüksek teknolojinin buluşması.', storyboard: 'Kamyonun geleneksel bir pazar yeri veya mahalle içindeki küçük bir vekil deposuna (market) yaklaştığı dış mekan çekimi. Geleneksel Irak mimarisi fon olarak kullanılır.' },
+                    { id: 13, title: 'Veri Senkronizasyonu (Teslimat Anı)', description: 'Şoför ve vekil, el cihazlarıyla biyometrik doğrulama yapar. Kimlik, coğrafi konum, saat ve teslim edilen miktar bilgisi anında MYS\'ye yüksek hızlı aktarılır.', storyboard: 'Yakın çekim: Vekil ve şoförün biyometrik olarak el cihazlarıyla doğrulanması. Cihazlardan çıkan veri paketlerinin MYS sunucusuna ışınlandığı dinamik bir ağ animasyonu.' },
+                    { id: 14, title: 'Vekil Envanter Takibi', description: 'Vekil, BioAffix mobil cihazıyla gelen ürünleri tarar. Ekranda "Vekil Deposundaki Kalan Gıda Malzemeleri Merkezden Anlık İzleniyor" uyarısı. Stok seviyesi grafiği yeşile döner.', storyboard: 'Depo içindeki raflarda duran ürün çuvalları. Vekil, bir çuvalı tararken ekranında stok sayısının güncellendiği görülür. Merkezden izleme paneli, vekilin deposunun stok seviyesini gösterir.' },
+                    { id: 15, title: 'Vatandaş Bildirimi (SMS)', description: 'Vatandaşın elindeki akıllı telefona bir bildirim gelir: "Gıda yardım paketiniz Terminalde hazır." Vatandaşın yüzündeki heyecan. Hız ve kesinlik vurgulanır.', storyboard: 'Vatandaşın elindeki telefona gelen Arapça SMS bildirimi. Vatandaşın yüzünde tebessüm belirir.' },
+                    { id: 16, title: 'Vatandaş Kimlik Doğrulaması', description: 'Vatandaş, kimlik kartını BioAffix cihazına okutur. Ekranda, tüm aile üyelerinin (hak sahipleri) bilgileri, birey bazında detaylarla belirir.', storyboard: 'Vatandaşın kimlik kartını BioAffix cihazına okuttuğu an. Cihazın ekranında ailenin tüm üyelerinin fotoğrafları ve tahsis bilgileri pop-up şeklinde görünür.' },
+                    { id: 17, title: 'Doğru Alokasyon ve Teslimat', description: 'Sistem onayı sonrası vekil, tam miktarda ürünü vatandaşa teslim eder. Vatandaşın yüzündeki memnuniyet ve güven yansıması. Hata payı sıfır.', storyboard: 'Vekil, vatandaşa (örneğin bir çuval un) teslim ederken samimi bir gülümseme. Hata payının sıfırlandığına dair bir metin animasyonu.' },
+                    { id: 18, title: 'Vatandaş Onayı: Biyometrik Güvenlik', description: 'Vatandaş, parmak izini okutarak teslimatı bizzat onaylar. "Vatandaş, Alacağını Tam Olarak Biliyor ve Biyometrik Olarak Onaylıyor." Şeffaflık maksimumda.', storyboard: 'Yakın çekim: Vatandaşın parmak izini BioAffix cihazına yerleştirdiği an. Ekranda büyük, yeşil bir onay işareti belirir.' },
+                    { id: 19, title: 'İşlem Tamam: Geri Bildirim', description: 'Vatandaş depodan ayrılırken cep telefonuna final SMS bildirimi gelir: "Teslimatınız başarıyla tamamlanmıştır. Teşekkür ederiz." Vatandaş Memnuniyet Düzeyi (VMD) sinyali yükselir.', storyboard: 'Teslimatını alan vatandaşın dışarı çıktığı an. Telefonuna gelen son SMS bildirimi. VMD (Vatandaş Memnuniyet Düzeyi) barının hızla yeşile yükseldiği animasyonu.' },
+                    { id: 20, title: 'Memnuniyet Dalgası (Toplumsal Etki)', description: 'Gülümseyen vatandaştan yayılan "Mutluluk Sinyalleri" (kalpler), Foodstuff, Ticaret Bakanlığı ve Başbakanlık merkezlerine ulaşır. Tüm Irak\'ı saran pozitif etki görseli.', storyboard: 'Vatandaşın yüzünden fışkıran kalplerin, Irak haritası üzerinde hızla yayılarak Foodstuff ve Bakanlık binalarına ulaştığı dinamik bir harita animasyonu.' },
+                    { id: 21, title: 'Ekip Birleşimi: Koruyucular', description: 'Projenin tüm paydaşları (Liman memuru, şoför, vekil, vatandaş) bir araya gelir. Hepsi Irak\'ın finansal servetini ve halkın güvenini korudukları için gururlu bir duruş sergiler.', storyboard: 'Farklı görevlerdeki tüm kilit figürlerin (memur, şoför, vekil, vatandaş) yan yana durduğu, gururlu bir ekip fotoğrafı karesi. Arkada Irak bayrağı hafifçe dalgalanır.' },
+                    { id: 22, title: 'Merkezi Entegrasyon Matrisi', description: 'Havadan bir görünümle MYS\'nin tüm BioAffix cihazları ve kritik veri kaynakları (NVİ, İçişleri Bakanlığı) ile sürekli veri alışverişinde bulunduğu bir "Ağ Haritası" gösterilir. Tam kontrol vurgusu.', storyboard: 'MYS ekranının karmaşık bir haritası: Limanlar, depolar ve vekillerdeki BioAffix cihazlarından gelen veri akışları ile NVİ ve İçişleri Bakanlığı veri tabanları arasındaki çift yönlü bağlantılar gösterilir.' },
+                    { id: 23, title: 'Finansal Geri Kazanım', description: 'Daha önce kaybolan banknotlar, bu kez bir "Hazine Kasası"na güvenle akarken gösterilir. "Yeni Sistem Yüz Milyonlarca Dolar Tasarruf Sağlıyor" metni yeşil renkte yanıp söner.', storyboard: 'Kaybolmayan banknotların, şeffaf bir kanaldan hızla devlete ait bir kasaya aktığı animasyon. Kasanın üzerinde büyük, yeşil harflerle "TASARRUF: Yüz Milyonlarca Dolar" yazar.' },
+                    { id: 24, title: 'Final Kodlama: Marka Tanıtımı', description: 'Ekran, koyu bir arayüzde merkezlenir. ONES Technology ve BioAffix logoları, parlak bir etkiyle belirir. Slogan: "Güvenli Teslimat, Bereketli Sofralar - Teknoloji ile Güven İnşa Ediyoruz."', storyboard: 'Siyah bir fona karşı, ONES Technology ve BioAffix logolarının parlak efektlerle belirginleştiği şık bir logo animasyonu. Slogan, logoların altında net ve vurgulu bir şekilde ortaya çıkar.' },
+                    { id: 25, title: 'Kapanış Protokolü ve İletişim', description: 'Logoların altında bir QR kodu ve iletişim kanalları (URL, İletişim Hattı) belirir. Arka planda yavaşça hareket eden dijital ağ hatları animasyonu ile sunum sonlanır.', storyboard: 'Ekranın ortasında logolar, altında büyük bir QR kodu ve iletişim bilgileri. Arka planda yavaşça hareket eden siber çizgiler ve data akışları.' }
+                ]
             },
-            { 
-                id: 2, 
-                title: 'Açılış: Finansal Anomali (İsraf)', 
-                description: 'Foodstuff Genel Şirketi\'nin binası gösterilir. Binadan yayılan "USD/Dinar" banknotlar, havaya dağılarak kaybolur. Kayıp ve israfın dramatik görseli. Ses: Yüksek gerilim tonları.', 
-                icon: '∰', // Flat Currency Flow (Integral/Loss)
-                storyboard: 'Foodstuff Genel Şirketi\'nin modern bir binasının havadan görünümü. Binadan çıkan banknotlar havada dağılarak kaybolur. Kamera, kaybolan parayı takip eder.'
-            },
-            { 
-                id: 3, 
-                title: 'Veri Analizi: Kayıp Raporu', 
-                description: 'Kaybolan paranın üzerinde istatistikler belirir: "Yıllık Harcama: ~3-4 Milyar USD". Vurgu: "Sistemdeki %10-20\'lik Kayıp yüz milyonlarca USD\'ye eşdeğerdir. Anomali tespit edildi." Rakamlar kırmızı renkte yanıp söner.', 
-                icon: '◬', // Flat Downward Trend
-                storyboard: 'Kırmızı ve tehlike belirten istatistikler (3-4 Milyar USD, %10-20 Kayıp) bir arayüzde yanıp söner. Rakamlar, grafik üzerinde keskin bir düşüş gösterir.'
-            },
-            { 
-                id: 4, 
-                title: 'Çözüm Aktivasyonu: Secure PDS', 
-                description: 'Kayıp noktasında parlak, yeşil bir ışık parlar ve "Secure PDS Biometric Authentication" simgesi ortaya çıkar. ONES Technology ve BioAffix markaları birleşir. Ses: Sistemin başlatılması.', 
-                icon: '⍟', // Flat Star/Solution
-                storyboard: 'Kaostan, ONES ve BioAffix logolarının yeşil bir enerji dalgasıyla birleştiği, temiz, keskin bir logo animasyonu çıkar. Tüm ekranı kaplayan güven hissi.'
-            },
-            { 
-                id: 5, 
-                title: 'Tedarik Kapsülü Girişi (Liman)', 
-                description: 'Güneşli, turkuaz bir deniz kıyısında büyük bir kargo gemisi limana yanaşır. Konteynerler (Un, Şeker) indirilir. Finansal kaybın, somut yaşam destek ünitelerine dönüştüğü animasyonla gösterilir.', 
-                icon: '☍', // Flat Connection/Docking
-                storyboard: 'Deniz kenarındaki modern bir liman. "Un" yazılı devasa konteynerler taşıyan gemi yanaşır. Kaybolan banknotların ürünlere (Un çuvalı) dönüştüğü soyut bir dönüşüm efekti.'
-            },
-            { 
-                id: 6, 
-                title: 'Mobil Otantikasyon: Birinci Kontrol Noktası', 
-                description: 'Liman görevlisi, "BioAffix Vision Mobile" cihazıyla şoförün biyometrik kimliğini ve yüz profilini tarar. Ekranda yeşil onay kodu belirir. "Yararlanıcının Biyometrik Doğrulaması Tamamlandı" mesajı.', 
-                icon: '⌭', // Flat Biometric Scan/Viewfinder
-                storyboard: 'Yakın çekim: Yöneticinin elindeki BioAffix mobil cihazı. Ekranda şoförün yüzü taranırken yeşil bir biyometrik ızgara belirir. Onaylandıktan sonra yeşil "OK" işareti yanıp söner.'
-            },
-            { 
-                id: 7, 
-                title: 'Dijital İrsaliye Gönderimi', 
-                description: 'Doğrulamanın ardından, cihaz ekranında dijital irsaliye kodu ve yük bilgileri görünür. "Kağıt Protokolü Kapatıldı. Belgeler Dijital Ortama Aktarıldı. Elektronik Envanter Takip Sistemi (EETS) Aktif." vurgusu.', 
-                icon: '⎘', // Flat Digital Export/Paper
-                storyboard: 'Mobil cihaz ekranından zoom out. Ekran, kağıt yığınlarının hızla dijital bir veri akışına dönüştüğünü gösterir. EETS logosu, bu dijital akışın üzerine yerleşir.'
-            },
-            { 
-                id: 8, 
-                title: 'Taşıma Vektörünün İzlenmesi', 
-                description: 'Yüklü kamyonlar limandan ayrılır. Her kamyonun üzerinde bir GPS sinyali belirir ve merkezi bir haritaya kilitlenir. "Dağıtım Temsilcileri Merkez Kontrol Biriminden Anlık İzleniyor."', 
-                icon: '⌖', // Flat Crosshair/Targeting
-                storyboard: 'Liman çıkış kapısından ayrılan kamyonlar dizisi. Bir uydu sinyali kamyonların üzerinden fırlar ve merkezi bir harita/izleme ekranına bağlanır.'
-            },
-            { 
-                id: 9, 
-                title: 'Ana Dağıtım İstasyonu', 
-                description: 'Kamyon konvoyunun, modern ve organize bir merkezi dağıtım deposuna (İstasyon) ulaştığı gösterilir. İstasyonun verimliliği ve kapasitesi vurgulanır.', 
-                icon: '⬟', // Flat Hexagon/Building
-                storyboard: 'Geniş bir açı: Kamyon konvoyunun, temiz ve büyük bir ana depolama tesisine (İstasyon) ulaştığı görseli. Deponun düzenli ve organize yapısı vurgulanır.'
-            },
-            { 
-                id: 10, 
-                title: 'Merkezi Yönetim (MYS) İşleme', 
-                description: 'Kontrol odasındaki büyük ekranda, MYS yazılım arayüzü görünür. "Merkezi Yönetim Sistemi (MYS) ile Vekillere Yönlendirilecek Ürün Miktarları Onaylanıyor. Optimizasyon Hesaplandı." Veri akışı görselleştirilir.', 
-                icon: '⌡', // Flat Integral/Control Panel
-                storyboard: 'Kontrol odasındaki bir personelin önündeki devasa MYS ekranına yakın çekim. Ekranda, farklı vekil bölgelerine tahsis edilen ürün miktarları yeşil onay tuşlarıyla birlikte belirir.'
-            },
-            { 
-                id: 11, 
-                title: 'Güvenli Sevkiyat: Çift Otantikasyon', 
-                description: 'Kamyon şoförü ve sevkiyat memuru, BioAffix cihazına parmak izi/iris taraması yapar. Kimlik doğrulamasının güvenli, iki faktörlü yapısı vurgulanır. Kamyon, onay sonrası yola çıkar.', 
-                icon: '⍾', // Flat Biometric Lock
-                storyboard: 'Kamyon kabininde, şoför ve memurun sırayla BioAffix cihazına parmak izi okuttuğu yakın çekim. Her iki biyometrik onayın da başarılı olduğunu gösteren yeşil bir kilit animasyonu.'
-            },
-            { 
-                id: 12, 
-                title: 'Vekil Terminaline Giriş', 
-                description: 'Kamyon, dar ve canlı şehir sokaklarından geçerek yerel bir vekil noktasına (Dağıtım Terminali) ulaşır. Kentsel doku ile yüksek teknolojinin buluşması.', 
-                icon: '⌂', // Flat House/Terminal
-                storyboard: 'Kamyonun geleneksel bir pazar yeri veya mahalle içindeki küçük bir vekil deposuna (market) yaklaştığı dış mekan çekimi. Geleneksel Irak mimarisi fon olarak kullanılır.'
-            },
-            { 
-                id: 13, 
-                title: 'Veri Senkronizasyonu (Teslimat Anı)', 
-                description: 'Şoför ve vekil, el cihazlarıyla biyometrik doğrulama yapar. Kimlik, coğrafi konum, saat ve teslim edilen miktar bilgisi anında MYS\'ye yüksek hızlı aktarılır.', 
-                icon: '⟳', // Flat Sync/Refresh
-                storyboard: 'Yakın çekim: Vekil ve şoförün biyometrik olarak el cihazlarıyla doğrulanması. Cihazlardan çıkan veri paketlerinin MYS sunucusuna ışınlandığı dinamik bir ağ animasyonu.'
-            },
-            { 
-                id: 14, 
-                title: 'Vekil Envanter Takibi', 
-                description: 'Vekil, BioAffix mobil cihazıyla gelen ürünleri tarar. Ekranda "Vekil Deposundaki Kalan Gıda Malzemeleri Merkezden Anlık İzleniyor" uyarısı. Stok seviyesi grafiği yeşile döner.', 
-                icon: '⌁', // Flat Inventory Check
-                storyboard: 'Depo içindeki raflarda duran ürün çuvalları. Vekil, bir çuvalı tararken ekranında stok sayısının güncellendiği görülür. Merkezden izleme paneli, vekilin deposunun stok seviyesini gösterir.'
-            },
-            { 
-                id: 15, 
-                title: 'Vatandaş Bildirimi (SMS)', 
-                description: 'Vatandaşın elindeki akıllı telefona bir bildirim gelir: "Gıda yardım paketiniz Terminalde hazır." Vatandaşın yüzündeki heyecan. Hız ve kesinlik vurgulanır.', 
-                icon: '⍰', // Flat Notification/Alert
-                storyboard: 'Vatandaşın elindeki telefona gelen Arapça SMS bildirimi. Vatandaşın yüzünde tebessüm belirir.'
-            },
-            { 
-                id: 16, 
-                title: 'Vatandaş Kimlik Doğrulaması', 
-                description: 'Vatandaş, kimlik kartını BioAffix cihazına okutur. Ekranda, tüm aile üyelerinin (hak sahipleri) bilgileri, birey bazında detaylarla belirir.', 
-                icon: '⊚', // Flat Identity/Individual
-                storyboard: 'Vatandaşın kimlik kartını BioAffix cihazına okuttuğu an. Cihazın ekranında ailenin tüm üyelerinin fotoğrafları ve tahsis bilgileri pop-up şeklinde görünür.'
-            },
-            { 
-                id: 17, 
-                title: 'Doğru Alokasyon ve Teslimat', 
-                description: 'Sistem onayı sonrası vekil, tam miktarda ürünü vatandaşa teslim eder. Vatandaşın yüzündeki memnuniyet ve güven yansıması. Hata payı sıfır.', 
-                icon: '⎱', // Flat Delivery/Transfer
-                storyboard: 'Vekil, vatandaşa (örneğin bir çuval un) teslim ederken samimi bir gülümseme. Hata payının sıfırlandığına dair bir metin animasyonu.'
-            },
-            { 
-                id: 18, 
-                title: 'Vatandaş Onayı: Biyometrik Güvenlik', 
-                description: 'Vatandaş, parmak izini okutarak teslimatı bizzat onaylar. "Vatandaş, Alacağını Tam Olarak Biliyor ve Biyometrik Olarak Onaylıyor." Şeffaflık maksimumda.', 
-                icon: '✓', // Flat Checkmark/Confirm
-                storyboard: 'Yakın çekim: Vatandaşın parmak izini BioAffix cihazına yerleştirdiği an. Ekranda büyük, yeşil bir onay işareti belirir.'
-            },
-            { 
-                id: 19, 
-                title: 'İşlem Tamam: Geri Bildirim', 
-                description: 'Vatandaş depodan ayrılırken cep telefonuna final SMS bildirimi gelir: "Teslimatınız başarıyla tamamlanmıştır. Teşekkür ederiz." Vatandaş Memnuniyet Düzeyi (VMD) sinyali yükselir.', 
-                icon: '⍰', // Flat Notification/Alert
-                storyboard: 'Teslimatını alan vatandaşın dışarı çıktığı an. Telefonuna gelen son SMS bildirimi. VMD (Vatandaş Memnuniyet Düzeyi) barının hızla yeşile yükseldiği animasyonu.'
-            },
-            { 
-                id: 20, 
-                title: 'Memnuniyet Dalgası (Toplumsal Etki)', 
-                description: 'Gülümseyen vatandaştan yayılan "Mutluluk Sinyalleri" (kalpler), Foodstuff, Ticaret Bakanlığı ve Başbakanlık merkezlerine ulaşır. Tüm Irak\'ı saran pozitif etki görseli.', 
-                icon: '⋇', // Flat Spread/Positive Influence
-                storyboard: 'Vatandaşın yüzünden fışkıran kalplerin, Irak haritası üzerinde hızla yayılarak Foodstuff ve Bakanlık binalarına ulaştığı dinamik bir harita animasyonu.'
-            },
-            { 
-                id: 21, 
-                title: 'Ekip Birleşimi: Koruyucular', 
-                description: 'Projenin tüm paydaşları (Liman memuru, şoför, vekil, vatandaş) bir araya gelir. Hepsi Irak\'ın finansal servetini ve halkın güvenini korudukları için gururlu bir duruş sergiler.', 
-                icon: '⍙', // Flat Union/Team
-                storyboard: 'Farklı görevlerdeki tüm kilit figürlerin (memur, şoför, vekil, vatandaş) yan yana durduğu, gururlu bir ekip fotoğrafı karesi. Arkada Irak bayrağı hafifçe dalgalanır.'
-            },
-            { 
-                id: 22, 
-                title: 'Merkezi Entegrasyon Matrisi', 
-                description: 'Havadan bir görünümle MYS\'nin tüm BioAffix cihazları ve kritik veri kaynakları (NVİ, İçişleri Bakanlığı) ile sürekli veri alışverişinde bulunduğu bir "Ağ Haritası" gösterilir. Tam kontrol vurgusu.', 
-                icon: '⧈', // Flat Grid/Matrix
-                storyboard: 'MYS ekranının karmaşık bir haritası: Limanlar, depolar ve vekillerdeki BioAffix cihazlarından gelen veri akışları ile NVİ ve İçişleri Bakanlığı veri tabanları arasındaki çift yönlü bağlantılar gösterilir.'
-            },
-            { 
-                id: 23, 
-                title: 'Finansal Geri Kazanım', 
-                description: 'Daha önce kaybolan banknotlar, bu kez bir "Hazine Kasası"na güvenle akarken gösterilir. "Yeni Sistem Yüz Milyonlarca Dolar Tasarruf Sağlıyor" metni yeşil renkte yanıp söner.', 
-                icon: '⌸', // Flat Vault/Secure Storage
-                storyboard: 'Kaybolmayan banknotların, şeffaf bir kanaldan hızla devlete ait bir kasaya aktığı animasyon. Kasanın üzerinde büyük, yeşil harflerle "TASARRUF: Yüz Milyonlarca Dolar" yazar.'
-            },
-            { 
-                id: 24, 
-                title: 'Final Kodlama: Marka Tanıtımı', 
-                description: 'Ekran, koyu bir arayüzde merkezlenir. ONES Technology ve BioAffix logoları, parlak bir etkiyle belirir. Slogan: "Güvenli Teslimat, Bereketli Sofralar - Teknoloji ile Güven İnşa Ediyoruz."', 
-                icon: '⋉', // Flat Logo/Product
-                storyboard: 'Siyah bir fona karşı, ONES Technology ve BioAffix logolarının parlak efektlerle belirginleştiği şık bir logo animasyonu. Slogan, logoların altında net ve vurgulu bir şekilde ortaya çıkar.'
-            },
-            { 
-                id: 25, 
-                title: 'Kapanış Protokolü ve İletişim', 
-                description: 'Logoların altında bir QR kodu ve iletişim kanalları (URL, İletişim Hattı) belirir. Arka planda yavaşça hareket eden dijital ağ hatları animasyonu ile sunum sonlanır.', 
-                icon: '⎚', // Flat Exit/Finish
-                storyboard: 'Ekranın ortasında logolar, altında büyük bir QR kodu ve iletişim bilgileri. Arka planda yavaşça hareket eden siber çizgiler ve data akışları.'
+            en: {
+                main_title: "BASS MOTION GRAPHIC SCENARIO",
+                subtitle: "PRODUCTION CONTROL PANEL | ONES & BIOAFFIX",
+                menu_title: "MISSION FLOW",
+                content_title: "SCENARIO CONTROL AND REVISION",
+                metin_title: "TEXT & CONTENT:",
+                gorsel_title: "VISUAL NOTE (STORYBOARD):",
+                sure_title: "Estimated Duration: 3.5 - 4.5 sec",
+                segment_prefix: "SEGMENT",
+                scenes: [
+                    { id: 1, title: 'Introduction: Global Competency (ONES Tech)', description: 'Various international project points shining on the world map are shown (Africa, Asia, Middle East). A large text appears: "ONES Technology: Global Security Solutions. Successful Implementation in 10+ Countries. Proven Biometric Integration Expertise." This forms a strong foundation for the Iraq project.', storyboard: '3D, futuristic world map with connection points showing active project areas, shining with blue and green lights. The camera zooms towards the Iraq/Middle East region from the map.' },
+                    { id: 2, title: 'Opening: Financial Anomaly (Waste)', description: 'The Foodstuff General Company building is shown. "USD/Dinar" banknotes emanating from the building scatter and vanish into the air. A dramatic visualization of loss and waste. Audio: High tension tones.', storyboard: 'Aerial view of the Foodstuff General Company\'s modern building. Banknotes flying out of the building scatter and disappear into the air. The camera tracks the vanishing money.' },
+                    { id: 3, title: 'Data Analysis: Loss Report', description: 'Statistics appear over the vanishing money: "Annual Expenditure: ~3-4 Billion USD". Emphasis: "10-20% Loss in the System is equivalent to hundreds of millions of USD. Anomaly detected." The figures blink red.', storyboard: 'Red and alarming statistics (3-4 Billion USD, 10-20% Loss) blink on an interface. The figures show a sharp decline on a graph.' },
+                    { id: 4, title: 'Solution Activation: Secure PDS', description: 'A bright, green light shines at the point of loss, and the "Secure PDS Biometric Authentication" icon emerges. ONES Technology and BioAffix brands merge. Audio: System initiation sound.', storyboard: 'A sleek, sharp logo animation emerges from chaos, where the ONES and BioAffix logos merge with a green energy wave. A sense of confidence fills the screen.' },
+                    { id: 5, title: 'Supply Capsule Entry (Port)', description: 'A large cargo ship approaches the port on a sunny, turquoise coastline. Containers (Flour, Sugar) are unloaded. Financial loss is animated as it transforms into tangible life support units.', storyboard: 'A modern port on the seaside. A ship carrying massive containers labeled "Flour" docks. An abstract transformation effect where vanishing banknotes turn into products (Flour sack).' },
+                    { id: 6, title: 'Mobile Authentication: First Checkpoint', description: 'The port official scans the driver\'s biometric ID and face profile using the "BioAffix Vision Mobile" device. A green approval code appears on the screen. Message: "Beneficiary Biometric Verification Complete".', storyboard: 'Close-up: The manager\'s BioAffix mobile device. A green biometric grid appears while scanning the driver\'s face on the screen. A green "OK" sign flashes after approval.' },
+                    { id: 7, title: 'Digital Dispatch Submission', description: 'Following verification, the digital dispatch code and cargo information appear on the device screen. Emphasis: "Paper Protocol Terminated. Documents Transferred to Digital Medium. Electronic Inventory Tracking System (EITS) Active.".', storyboard: 'Zoom out from the mobile device screen. The screen shows stacks of paper quickly transforming into a digital data stream. The EITS logo is superimposed on this digital stream.' },
+                    { id: 8, title: 'Tracking the Transport Vector', description: 'Loaded trucks leave the port. A GPS signal appears on each truck and locks onto a central map. "Distribution Agents are Monitored Instantly from the Central Control Unit."', storyboard: 'A series of trucks leaving the port gate. A satellite signal shoots up from the trucks and connects to a central map/monitoring screen.' },
+                    { id: 9, title: 'Main Distribution Station', description: 'The convoy of trucks is shown arriving at a modern, organized central distribution warehouse (Station). The efficiency and capacity of the Station are emphasized.', storyboard: 'Wide angle: Visual of the truck convoy arriving at a clean and large main storage facility (Station). The organized structure of the warehouse is highlighted.' },
+                    { id: 10, title: 'Central Management System (MYS) Processing', description: 'The MYS software interface is visible on the large screen in the control room. "Product Quantities to be Directed to Agents are Approved via the Central Management System (MYS). Optimization Calculated." Data flow is visualized.', storyboard: 'Close-up on the huge MYS screen in front of a control room operator. The screen shows product quantities allocated to different agent regions with green approval buttons.' },
+                    { id: 11, title: 'Secure Shipment: Dual Authentication', description: 'The truck driver and the shipment officer perform a fingerprint/iris scan on the BioAffix device. The secure, two-factor nature of the authentication is emphasized. The truck departs after approval.', storyboard: 'Close-up: The driver and officer sequentially scan their fingerprints on the BioAffix device in the truck cabin. A green lock animation indicating successful dual biometric approval.' },
+                    { id: 12, title: 'Arrival at Agent Terminal', description: 'The truck travels through narrow, lively city streets to reach a local agent point (Distribution Terminal). The fusion of urban texture and high technology.', storyboard: 'Exterior shot of the truck approaching a small agent warehouse (market) in a traditional marketplace or neighborhood. Traditional Iraqi architecture is used as the background.' },
+                    { id: 13, title: 'Data Synchronization (Moment of Delivery)', description: 'The driver and agent perform biometric verification with handheld devices. ID, geographic location, time, and delivered quantity information are instantly transferred to the MYS at high speed.', storyboard: 'Close-up: The agent and driver being biometrically verified with handheld devices. A dynamic network animation showing data packets shooting from the devices to the MYS server.' },
+                    { id: 14, title: 'Agent Inventory Tracking', description: 'The agent scans the incoming products with the BioAffix mobile device. Warning on the screen: "Remaining Foodstuffs in the Agent\'s Store are Monitored Instantly from the Center." Stock level graph turns green.', storyboard: 'Product sacks on shelves inside the warehouse. The agent scans a sack, and the stock count updates on their screen. The central monitoring panel shows the agent\'s real-time stock level.' },
+                    { id: 15, title: 'Citizen Notification (SMS)', description: 'A notification pops up on the citizen\'s smartphone: "Your food aid package is ready at the Terminal." The excitement on the citizen\'s face. Speed and certainty are emphasized.', storyboard: 'Arabic SMS notification arriving on the citizen\'s phone. A smile appears on the citizen\'s face.' },
+                    { id: 16, title: 'Citizen ID Verification', description: 'The citizen scans their ID card on the BioAffix device. On the screen, information for all family members (beneficiaries) appears with individual details.', storyboard: 'The moment the citizen scans their ID card on the BioAffix device. Photos and allocation details of all family members appear as a pop-up on the device screen.' },
+                    { id: 17, title: 'Accurate Allocation and Delivery', description: 'After system approval, the agent hands the exact quantity of the product to the citizen. Reflection of satisfaction and trust on the citizen\'s face. Zero margin of error.', storyboard: 'The agent hands the product (e.g., a sack of flour) to the citizen with a genuine smile. An animated text emphasizing zero margin of error.' },
+                    { id: 18, title: 'Citizen Approval: Biometric Security', description: 'The citizen confirms the delivery by scanning their fingerprint. "The Citizen Knows Exactly What They Are Receiving and Confirms Biometrically." Maximum transparency.', storyboard: 'Close-up: The citizen placing their fingerprint on the BioAffix device. A large, green checkmark appears on the screen.' },
+                    { id: 19, title: 'Transaction Complete: Feedback', description: 'A final SMS notification arrives on the citizen\'s phone as they leave the store: "Your delivery has been successfully completed. Thank you." Citizen Satisfaction Level (CSL) signal rises.', storyboard: 'The moment the satisfied citizen leaves. The final SMS notification on their phone. An animation showing the CSL bar rapidly climbing to green.' },
+                    { id: 20, title: 'Satisfaction Wave (Social Impact)', description: 'The "Happiness Signals" (hearts) radiating from the smiling citizen reach the headquarters of Foodstuff, the Ministry of Trade, and the Prime Ministry. A visual of the positive impact spreading across all of Iraq.', storyboard: 'A dynamic map animation showing hearts radiating from the citizen\'s face, quickly spreading across the map of Iraq, reaching Foodstuff and Ministry buildings.' },
+                    { id: 21, title: 'Team Union: The Protectors', description: 'All project stakeholders (Port official, driver, agent, citizen) come together. They strike a proud pose for protecting Iraq\'s financial wealth and the public\'s trust.', storyboard: 'A proud group photo shot where all key figures (official, driver, agent, citizen) stand side-by-side. The Iraqi flag gently waves in the background.' },
+                    { id: 22, title: 'Central Integration Matrix', description: 'An aerial view shows a "Network Map" where the MYS continuously exchanges data with all BioAffix devices and critical data sources (ID/Passport Office, Ministry of Interior). Emphasis on full control.', storyboard: 'A complex map of the MYS screen: showing the dual-directional connections between data flows from BioAffix devices at ports, warehouses, and agents, and databases from the ID/Passport Office and Ministry of Interior.' },
+                    { id: 23, title: 'Financial Recovery', description: 'The banknotes that were previously vanishing are now shown securely flowing into a "Treasure Vault". Text: "The New System Saves Hundreds of Millions of Dollars" blinks green.', storyboard: 'An animation showing non-vanishing banknotes rapidly flowing through a transparent channel into a government treasury vault. Large, green letters on the vault display "SAVINGS: Hundreds of Millions of Dollars".' },
+                    { id: 24, title: 'Final Coding: Brand Introduction', description: 'The screen centers on a dark interface. The ONES Technology and BioAffix logos appear with a glowing effect. Slogan: "Secure Delivery, Prosperous Tables - Building Trust with Technology."', storyboard: 'A stylish logo animation where the ONES Technology and BioAffix logos become prominent with bright effects against a black background. The slogan appears clearly and emphatically below the logos.' },
+                    { id: 25, title: 'Closing Protocol and Contact', description: 'A QR code and communication channels (URL, Contact Line) appear below the logos. The presentation concludes with a subtle background animation of digital network lines and data flows.', storyboard: 'Logos centered on the screen, below them a large QR code and contact information. Subtle moving cyber lines and data flows in the background.' }
+                ]
             }
-        ];
+        };
+
+        let currentLang = 'tr'; 
         
-        // --- Uygulama Mantığı ---
+        // --- Uygulama Mantığı (Statik) ---
         
         function renderContent() {
+            const data = translations[currentLang];
+            const scenesData = data.scenes;
+            
+            // Header ve başlıkları güncelle
+            document.getElementById('main-title').textContent = data.main_title;
+            document.getElementById('subtitle').textContent = data.subtitle;
+            document.getElementById('menu-title').textContent = data.menu_title;
+            document.getElementById('content-title').textContent = data.content_title;
+            document.getElementById('lang-toggle').textContent = currentLang.toUpperCase();
+            
             const navigation = document.getElementById('scene-navigation').querySelector('ul');
             const detailsContainer = document.getElementById('scene-details');
 
-            if (!navigation || !detailsContainer) {
-                 console.error("HATA: DOM elemanlarına erişilemiyor (navigation veya detailsContainer null).");
-                 return;
-            }
-
-            // *** Düzeltme: Kullanıcı ID'sini güncelleyen kısmı tekrar çalıştır ***
-            document.querySelectorAll('.correction-area label span').forEach(span => {
-                 span.textContent = window.userId || 'Yükleniyor...';
-            });
+            if (!navigation || !detailsContainer) return;
 
             // Navigasyon (MİSYON AKIŞI) içeriğini doldur
-            navigation.innerHTML = scenes.map(scene => `
+            navigation.innerHTML = scenesData.map(scene => `
                 <li>
                     <a href="#scene-${scene.id}" data-scene-id="${scene.id}" class="nav-link scene-link flex items-center p-3 rounded-lg transition-all duration-300 border-l-4 border-transparent">
                         <span class="mr-3 flat-icon scene-icon">${scene.icon}</span>
@@ -428,46 +200,37 @@
             `).join('');
 
             // Detaylar (SENARYO KONTROL) içeriğini doldur
-            detailsContainer.innerHTML = scenes.map(scene => `
+            detailsContainer.innerHTML = scenesData.map(scene => `
                 <section id="scene-${scene.id}" class="scene-card p-6 rounded-lg shadow-xl mb-8">
                     <div class="flex items-center justify-between border-b border-gray-700 pb-3 mb-4">
                         <h3 class="text-xl md:text-2xl font-bold text-[var(--color-primary)] futuristic-title flex items-center">
                             <span class="mr-3 flat-icon scene-icon">${scene.icon}</span>
-                            SEGMENT ${scene.id}: ${scene.title.toUpperCase()}
+                            ${data.segment_prefix.toUpperCase()} ${scene.id}: ${scene.title.toUpperCase()}
                         </h3>
-                        <span class="text-xs text-gray-400">Önerilen Süre: 3.5 - 4.5 sn</span>
+                        <span class="text-xs text-gray-400">${data.sure_title}</span>
                     </div>
                     
                     <div class="description-area mb-6">
-                        <h4 class="font-semibold text-gray-300 mb-1 border-b border-gray-700">METİN & İÇERİK:</h4>
+                        <h4 class="font-semibold text-gray-300 mb-1 border-b border-gray-700">${data.metin_title}</h4>
                         <p class="text-gray-400 text-base leading-relaxed pl-2">${scene.description}</p>
                     </div>
 
                     <div class="storyboard-area p-4 rounded-lg mb-6">
-                        <h4 class="font-semibold text-gray-300 mb-1 border-b border-gray-700">GÖRSEL NOT (STORYBOARD):</h4>
+                        <h4 class="font-semibold text-gray-300 mb-1 border-b border-gray-700">${data.gorsel_title}</h4>
                         <p class="text-sm text-gray-400 pl-2">${scene.storyboard}</p>
                     </div>
-
-                    <!-- Revizyon ve Düzeltme Notu Alanı -->
-                    <div class="correction-area p-4 border border-gray-700 rounded-lg">
-                        <label for="notes-${scene.id}" class="block text-sm font-semibold text-[var(--color-secondary)] mb-2">REVİZYON KONSOLU (Düzeltme Notları - Kullanıcı ID: <span class="text-[var(--color-primary)]">${window.userId || 'Yükleniyor...'}</span>):</label>
-                        <textarea id="notes-${scene.id}" rows="4" class="w-full p-3 rounded-lg focus:ring-[var(--color-secondary)] focus:border-[var(--color-secondary)] transition-all" placeholder="Buraya animasyon, metin veya süre ile ilgili düzeltme/ekleme notlarınızı giriniz..." oninput="document.getElementById('save-btn-${scene.id}').disabled = this.value.trim() === ''"></textarea>
-                        <div class="mt-3 flex justify-end items-center space-x-3">
-                            <span id="status-${scene.id}" class="hidden text-sm font-semibold"></span>
-                            <button id="save-btn-${scene.id}" onclick="saveNote(${scene.id})" disabled class="bg-[var(--color-secondary)] hover:bg-green-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition-all duration-300 disabled:opacity-50">
-                                Notu Kaydet
-                            </button>
-                        </div>
-                    </div>
-
                 </section>
             `).join('');
 
-            scenes.forEach(scene => {
-                window.loadNote(scene.id);
-            });
+            setInitialState(); // İçerik güncellendikten sonra aktif linki ayarla
         }
 
+        function toggleLanguage() {
+            currentLang = currentLang === 'tr' ? 'en' : 'tr';
+            renderContent();
+            localStorage.setItem('currentLang', currentLang); // Dili kaydet
+        }
+        
         function handleNavigation(e) {
             e.preventDefault();
             const link = e.target.closest('.scene-link');
@@ -496,22 +259,29 @@
             if (hash && hash.startsWith('#scene-')) {
                 const sceneId = hash.replace('#scene-', '');
                 updateActiveLink(sceneId);
-                document.getElementById(hash)?.scrollIntoView({ behavior: 'auto', block: 'start' });
-            } else if (scenes.length > 0) {
-                 updateActiveLink(scenes[0].id.toString());
+                // Burada scroll'u manuel olarak yapmıyoruz, Intersection Observer halledecek
+            } else if (translations[currentLang].scenes.length > 0) {
+                 updateActiveLink(translations[currentLang].scenes[0].id.toString());
             }
         }
         
-        document.addEventListener('DOMContentLoaded', async () => {
-            
-            await window.initializeFirebase();
+        document.addEventListener('DOMContentLoaded', () => {
+            // Kayıtlı dili kontrol et
+            const savedLang = localStorage.getItem('currentLang');
+            if (savedLang && translations[savedLang]) {
+                currentLang = savedLang;
+            }
+
             renderContent();
             
             const navigationElement = document.getElementById('scene-navigation').querySelector('ul');
             
             navigationElement.addEventListener('click', handleNavigation);
-            setInitialState();
+            
+            // Dil Butonuna dinleyici ekle
+            document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
 
+            // Scroll tabanlı aktif link güncellemesi (Intersection Observer)
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -531,8 +301,13 @@
     
     <header class="bg-gray-900 text-white p-4 shadow-2xl sticky top-0 z-10">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-[var(--color-secondary)] futuristic-title">BASS MOTION GRAPHIC SENARYO</h1>
-            <span class="text-sm font-light text-gray-400 hidden sm:block">ÜRETİM KONTROL PANELİ | ONES & BIOAFFIX</span>
+            <h1 id="main-title" class="text-xl md:text-2xl font-bold text-[var(--color-secondary)] futuristic-title">BASS MOTION GRAPHIC SENARYO</h1>
+            <div class="flex items-center space-x-4">
+                <span id="subtitle" class="text-sm font-light text-gray-400 hidden sm:block">ÜRETİM KONTROL PANELİ | ONES & BIOAFFIX</span>
+                <button id="lang-toggle" onclick="toggleLanguage()" class="font-bold py-1 px-3 rounded-full text-sm transition-all duration-200">
+                    TR
+                </button>
+            </div>
         </div>
     </header>
 
@@ -540,7 +315,7 @@
 
         <!-- Sol Menü: MİSYON AKIŞI (Navigasyon) -->
         <nav id="scene-navigation" class="w-full lg:w-1/4 mb-4 lg:mb-0 bg-gray-900 shadow-2xl rounded-lg p-4">
-            <h2 class="text-lg font-bold text-[var(--color-primary)] border-b border-gray-700 pb-2 mb-4 futuristic-title">MİSYON AKIŞI</h2>
+            <h2 id="menu-title" class="text-lg font-bold text-[var(--color-primary)] border-b border-gray-700 pb-2 mb-4 futuristic-title">MİSYON AKIŞI</h2>
             <ul class="space-y-1">
                 <!-- Navigasyon JS ile doldurulacak -->
             </ul>
@@ -548,7 +323,7 @@
 
         <!-- Sağ İçerik: SENARYO KONTROL (Detaylar ve Notlar) -->
         <div id="scene-details" class="w-full lg:w-3/4">
-            <h2 class="text-2xl font-bold text-[var(--color-primary)] mb-6 futuristic-title">SENARYO KONTROL VE REVİZYON</h2>
+            <h2 id="content-title" class="text-2xl font-bold text-[var(--color-primary)] mb-6 futuristic-title">SENARYO KONTROL VE REVİZYON</h2>
             <!-- Detaylar JS ile doldurulacak -->
         </div>
 
