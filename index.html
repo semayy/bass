@@ -3,385 +3,466 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BASS Motion Graphic Senaryo - Revizyon Konsolu</title>
+    <title>BASS Motion Graphic Senaryo - Flat & Futuristik</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Nebula Console (Deep Black, Cyber Cyan, Electric Lime Accent) -->
-    <!-- Application Structure Plan: The layout is fully responsive. On desktop, the main container uses `flex` to maintain a fixed sidebar width (md:w-1/4, max-h-screen, overflow-y-auto) and a primary content scroll area (md:w-3/4, overflow-y-auto). On mobile, sections stack vertically. All elements are constrained using max-widths and padding to prevent horizontal overflow, ensuring the system works correctly on all screen sizes. Added a 'Correction Notes' section (textarea) to each scene for collaborative editing. -->
-    <!-- Visualization & Content Choices: 25-scene narrative flow with single-color, flat Unicode icons for a high-tech, minimalistic console theme. Interaction is based on responsive jump links and scroll-based active state updating. (NO SVG, NO Mermaid). -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        /* Ana Renk Paleti ve Fontlar */
+        /* Modern Dark Mode & Futuristik Flat Stiller */
+        :root {
+            --color-primary: #00ffff; /* Neon Mavi/Siyan (Vurgu 1) */
+            --color-secondary: #00ff00; /* Neon Yeşil (Vurgu 2 - Onay/Başarı) */
+            --color-bg-dark: #0f172a; /* Zemin Siyah/Lacivert */
+            --color-bg-card: #1e293b; /* Kart Arka Planı */
+            --color-text-light: #f1f5f9; /* Açık Metin */
+            --color-text-muted: #94a3b8; /* Soluk Metin */
+            --color-border: #334155; /* Sınır Çizgisi */
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d1117; /* Deep Space Black */
-            color: #d1f7ff; /* Açık Cyan (Genel Metin) */
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden; /* Yatay kaymayı kesinlikle engelle */
+            background-color: var(--color-bg-dark);
+            color: var(--color-text-light);
+            scroll-behavior: smooth;
         }
-        .console-font {
+
+        /* Başlık Fontu: Daha futuristik bir dokunuş için */
+        .futuristic-title {
             font-family: 'Orbitron', sans-serif;
-        }
-        .text-neon {
-            color: #00ffff; /* Cyber Cyan */
-        }
-        .text-lime-accent {
-            color: #ccff00; /* Electric Lime Accent */
-        }
-        .bg-console-dark {
-            background-color: #161b22; /* Darker panel */
-            border: 1px solid #00ffff40;
-            box-shadow: 0 0 10px #00ffff20;
+            letter-spacing: 0.05em;
         }
 
-        /* Navigasyon ve Etkileşim Stilleri */
-        .active-scene-link {
-            background-color: #00ffff30; /* Active background */
-            color: #ccff00; /* Electric Lime */
-            border-left: 4px solid #ccff00;
-            box-shadow: 0 0 15px #ccff0080;
+        /* Navigasyon Stilleri */
+        .nav-link {
+            border-left: 4px solid transparent;
+            color: var(--color-text-light);
         }
-        .scene-link:hover {
-            color: #00ffff;
+        .nav-link.active-scene-link {
+            background-color: #1e293b; /* Kart Arka Planı rengi */
+            border-left-color: var(--color-secondary) !important;
+            font-weight: 600;
         }
-
-        /* Düz İkon Stili */
-        .flat-icon {
-            font-size: 1.5rem; 
-            line-height: 1;
-            display: inline-block;
-            color: #00ffff; /* Default flat color */
-            width: 1.5rem;
-            text-align: center;
-        }
-        .active-scene-link .flat-icon {
-            color: #ccff00 !important; /* Active icon color */
+        .nav-link:hover {
+             background-color: #1e293b;
+             border-left-color: var(--color-primary);
         }
 
-        /* Özelleştirilmiş Kaydırma Çubuğu */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #161b22;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #00ffff;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #ccff00;
-        }
-
-        /* Responsive ve Sabit Navigasyon İçin CSS */
-        @media (min-width: 768px) {
+        /* Responsive ve Sabit Navigasyon */
+        @media (min-width: 1024px) {
             #scene-navigation {
                 position: sticky;
-                top: 2rem; /* Üst başlığa göre boşluk */
-                height: calc(100vh - 4rem); /* Görüntülenebilir yüksekliğin tamamını kapla */
-                overflow-y: auto; /* Kaydırma çubuğunu içeride tut */
-            }
-            .scene-card {
-                scroll-margin-top: 5rem; /* Sabit menüden dolayı scroll mesafesi */
+                top: 1rem;
+                height: calc(100vh - 2rem);
+                overflow-y: auto;
             }
         }
-        @media (max-width: 767px) {
-            /* Mobil scroll mesafesi */
-            .scene-card {
-                scroll-margin-top: 1rem;
-            }
+        
+        /* Kart ve Alan Stilleri */
+        .flat-icon {
+            font-size: 1.25rem; /* İkon boyutu */
+            line-height: 1;
         }
-        .storyboard-note {
-            background-color: #0d2024;
-            border-left: 4px solid #ccff00;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-style: italic;
-            color: #a0f4ff;
+        .scene-icon {
+            color: var(--color-primary);
         }
-        .correction-area {
-            margin-top: 1.5rem;
-            border-top: 1px solid #00ffff40;
-            padding-top: 1rem;
+        .scene-icon.active {
+            color: var(--color-secondary);
+        }
+        .scene-card {
+            border-left: 5px solid var(--color-primary);
+            background-color: var(--color-bg-card); /* Koyu kart */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+        }
+        .storyboard-area {
+            border: 1px solid var(--color-border);
+            background-color: #0f172a; /* Zemin rengi ile kontrast */
+        }
+        .correction-area textarea {
+            background-color: #020617; /* Siyah tonu */
+            border-color: var(--color-border);
+            color: var(--color-text-light);
+        }
+        .correction-area textarea:focus {
+            border-color: var(--color-secondary);
+            box-shadow: 0 0 0 1px var(--color-secondary);
         }
     </style>
-</head>
-<body>
+    
+    <!-- Firebase CDN'leri -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <div id="app" class="max-w-7xl mx-auto p-4 md:p-8">
+        // Global Firebase değişkenlerini tanımlama
+        window.firebaseApp = null;
+        window.db = null;
+        window.auth = null;
+        window.userId = null;
+        window.appId = null;
+
+        // Firebase başlatma ve kimlik doğrulama işlevi
+        async function initializeFirebase() {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+            window.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-bass-app-id';
+
+            if (firebaseConfig) {
+                try {
+                    window.firebaseApp = initializeApp(firebaseConfig);
+                    window.db = getFirestore(window.firebaseApp);
+                    window.auth = getAuth(window.firebaseApp);
+                    
+                    await setPersistence(window.auth, browserLocalPersistence);
+
+                    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                    
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(window.auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(window.auth);
+                    }
+
+                    window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
+                    console.log("Firebase Başarılı. Kullanıcı ID:", window.userId);
+                    
+                } catch (error) {
+                    console.error("Firebase başlatma hatası:", error);
+                    window.userId = 'anon_local_error';
+                }
+            } else {
+                 console.warn("Firebase config bulunamadı. Not kaydetme devre dışı.");
+                 window.userId = 'anon_local';
+            }
+        }
+
+        // Notu Kaydetme İşlevi (Firestore)
+        window.saveNote = async (sceneId) => {
+            const noteTextarea = document.getElementById(`notes-${sceneId}`);
+            const saveButton = document.getElementById(`save-btn-${sceneId}`);
+            const statusIndicator = document.getElementById(`status-${sceneId}`);
+            const noteText = noteTextarea.value.trim();
+
+            if (!window.db || !window.userId || window.userId.includes('anon_local')) {
+                statusIndicator.textContent = "Kaydedilemiyor: Oturum Açma Gerekli.";
+                statusIndicator.classList.remove('hidden', 'text-[var(--color-secondary)]');
+                statusIndicator.classList.add('text-red-500');
+                return;
+            }
+
+            if (noteText === '') {
+                statusIndicator.textContent = "Hata: Not alanı boş.";
+                statusIndicator.classList.remove('hidden', 'text-[var(--color-secondary)]');
+                statusIndicator.classList.add('text-red-500');
+                return;
+            }
+
+            saveButton.disabled = true;
+            statusIndicator.textContent = "Kaydediliyor...";
+            statusIndicator.classList.remove('hidden', 'text-red-500');
+            statusIndicator.classList.add('text-[var(--color-secondary)]');
+
+            try {
+                const docRefPath = `/artifacts/${window.appId}/users/${window.userId}/scene_notes/${sceneId}`;
+                const docRef = doc(window.db, docRefPath);
+
+                await setDoc(docRef, {
+                    note: noteText,
+                    sceneId: sceneId,
+                    userId: window.userId,
+                    timestamp: serverTimestamp()
+                });
+
+                statusIndicator.textContent = "BAŞARILI: Not kaydedildi. ✔";
+                statusIndicator.classList.remove('text-red-500');
+                statusIndicator.classList.add('text-[var(--color-secondary)]');
+
+            } catch (e) {
+                console.error("Not kaydederken hata oluştu: ", e);
+                statusIndicator.textContent = "HATA: Kayıt sırasında bir sorun oluştu.";
+                statusIndicator.classList.remove('text-[var(--color-secondary)]');
+                statusIndicator.classList.add('text-red-500');
+            } finally {
+                saveButton.disabled = false;
+                setTimeout(() => {
+                    statusIndicator.classList.add('hidden');
+                }, 3000);
+            }
+        };
+
+        // Notu Yükleme İşlevi (Firestore)
+        window.loadNote = async (sceneId) => {
+            const noteTextarea = document.getElementById(`notes-${sceneId}`);
+            if (!noteTextarea) return;
+
+            if (!window.db || !window.userId || window.userId.includes('anon_local')) {
+                noteTextarea.value = "Çevrimdışı Mod: Notlar kalıcı olarak kaydedilemez.";
+                return;
+            }
+
+            try {
+                const docRefPath = `/artifacts/${window.appId}/users/${window.userId}/scene_notes/${sceneId}`;
+                const docRef = doc(window.db, docRefPath);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    noteTextarea.value = docSnap.data().note || '';
+                } else {
+                    noteTextarea.value = '';
+                }
+            } catch (e) {
+                console.error(`Not yüklenirken hata oluştu (Sahne ${sceneId}): `, e);
+                noteTextarea.value = "Hata: Not yüklenemedi.";
+            }
+        };
         
-        <header class="text-center mb-6 md:mb-10 border-b pb-4 md:pb-6 border-cyan-700">
-            <div class="flex justify-center items-center gap-2 md:gap-4 mb-2 console-font text-sm md:text-xl text-lime-accent">
-                <span class="pulse-glow">✶</span>
-                <span class="text-neon">PROJE ADI</span>
-                <span class="pulse-glow">✶</span>
-            </div>
-            <h1 class="text-2xl md:text-5xl font-bold text-neon console-font">Biometric Authentication Secure System (BASS)</h1>
-            <p class="mt-2 text-sm md:text-lg text-cyan-400 max-w-4xl mx-auto">Motion Graphic Senaryo ve Revizyon Konsolu.</p>
-        </header>
+        window.initializeFirebase = initializeFirebase;
 
-        <div class="flex flex-col md:flex-row gap-6 md:gap-8">
-            
-            <!-- Navigasyon (MISSION LOG) - Masaüstünde Sabit, Mobil Kaydırılabilir -->
-            <nav id="scene-navigation" class="md:w-1/4 bg-console-dark p-4 rounded-xl shadow-2xl">
-                <h2 class="text-lg md:text-xl font-bold mb-3 text-lime-accent border-b pb-2 border-cyan-700 console-font">GÖREV KAYDI (SAHNELER)</h2>
-                <ul class="space-y-1">
-                    <!-- Navigation links will be inserted here by JavaScript -->
-                </ul>
-            </nav>
-
-            <!-- Ana İçerik (DATA TERMINAL) -->
-            <main id="scene-details" class="md:w-3/4 space-y-4 md:space-y-6">
-                 <!-- Scene details will be inserted here by JavaScript -->
-            </main>
-
-        </div>
-    </div>
-
+    </script>
+    
     <script>
-        // İkonlar ve Senaryo Verileri (Yeni Scene 1 eklendi, diğerleri kaydırıldı)
+        // Senaryo Verileri (İkonlar Flat ve Modern Unicode'a çevrildi)
         const scenes = [
-            // YENİ GİRİŞ SAHNESİ: Küresel Yetkinlik (1)
             {
                 id: 1, 
                 title: 'Giriş: Küresel Yetkinlik (ONES Tech)', 
                 description: 'Dünya haritası üzerinde parlayan çeşitli uluslararası proje noktaları gösterilir (Afrika, Asya, Orta Doğu). Büyük bir metin belirir: "ONES Technology: Global Güvenlik Çözümleri. 10+ Ülkede Başarılı Uygulama. Kanıtlanmış Biyometrik Entegrasyon Uzmanlığı." Bu, Irak projesi için güçlü bir temel oluşturur.', 
-                icon: '⌁', // Global Connection
-                storyboard: '3D, fütüristik dünya haritası üzerinde siber mavi ve yeşil ışıklarla parlayan, aktif proje bölgelerini gösteren bağlantı noktaları. Kamera haritadan Irak/Orta Doğu bölgesine doğru zoom yapar.'
+                icon: '❖', // Flat Global Connection
+                storyboard: '3D, fütüristik dünya haritası üzerinde mavi ve yeşil ışıklarla parlayan, aktif proje bölgelerini gösteren bağlantı noktaları. Kamera haritadan Irak/Orta Doğu bölgesine doğru zoom yapar.'
             },
-            // ESKİ Scene 1 (YENİ Scene 2)
             { 
                 id: 2, 
                 title: 'Açılış: Finansal Anomali (İsraf)', 
-                description: 'Foodstuff Genel Şirketi\'nin Holografik binası gösterilir. Binadan yayılan "USD/Dinar" data paketleri, atmosfere sızarak kaybolur. Kayıp ve israfın dramatik görseli. Ses: Yüksek gerilim tonları.', 
-                icon: 'Ø', 
-                storyboard: 'Foodstuff Genel Şirketi\'nin modern bir binasının havadan görünümü. Binadan çıkan dijital banknot (USD/Dinar) paketleri, havada dağılarak karanlık bir siber boşluğa karışır. Kamera, kaybolan parayı takip eder.'
+                description: 'Foodstuff Genel Şirketi\'nin binası gösterilir. Binadan yayılan "USD/Dinar" banknotlar, havaya dağılarak kaybolur. Kayıp ve israfın dramatik görseli. Ses: Yüksek gerilim tonları.', 
+                icon: '∰', // Flat Currency Flow (Integral/Loss)
+                storyboard: 'Foodstuff Genel Şirketi\'nin modern bir binasının havadan görünümü. Binadan çıkan banknotlar havada dağılarak kaybolur. Kamera, kaybolan parayı takip eder.'
             },
-            // ESKİ Scene 2 (YENİ Scene 3)
             { 
                 id: 3, 
                 title: 'Veri Analizi: Kayıp Raporu', 
-                description: 'Kaybolan data paketleri üzerinde istatistikler belirir: "Yıllık Harcama: ~3-4 Giga-USD". Vurgu: "Sistemdeki %10-20\'lik Kayıp yüz milyonlarca USD\'ye eşdeğerdir. Anomali tespit edildi." Rakamlar kırmızı renkte yanıp söner.', 
-                icon: '∇',
-                storyboard: 'Kırmızı ve tehlike belirten istatistikler (3-4 Milyar USD, %10-20 Kayıp) bir arayüzde yanıp söner. Rakamlar, siber bir grafik üzerinde aşağı doğru keskin bir düşüş gösterir.'
+                description: 'Kaybolan paranın üzerinde istatistikler belirir: "Yıllık Harcama: ~3-4 Milyar USD". Vurgu: "Sistemdeki %10-20\'lik Kayıp yüz milyonlarca USD\'ye eşdeğerdir. Anomali tespit edildi." Rakamlar kırmızı renkte yanıp söner.', 
+                icon: '◬', // Flat Downward Trend
+                storyboard: 'Kırmızı ve tehlike belirten istatistikler (3-4 Milyar USD, %10-20 Kayıp) bir arayüzde yanıp söner. Rakamlar, grafik üzerinde keskin bir düşüş gösterir.'
             },
-            // ESKİ Scene 3 (YENİ Scene 4)
             { 
                 id: 4, 
                 title: 'Çözüm Aktivasyonu: Secure PDS', 
-                description: 'Kayıp noktasında parlak, siber-yeşil bir ışık parlar ve "Secure PDS Biometric Authentication" simgesi ortaya çıkar. ONES Technology ve BioAffix markaları birleşir. Ses: Sistemin başlatılması.', 
-                icon: '⌖',
-                storyboard: 'Kayıp ve israfı simgeleyen kaostan, ONES ve BioAffix logolarının siber-yeşil bir enerji dalgasıyla birleştiği, temiz, keskin bir logo animasyonu çıkar. Tüm ekranı kaplayan güven hissi.'
+                description: 'Kayıp noktasında parlak, yeşil bir ışık parlar ve "Secure PDS Biometric Authentication" simgesi ortaya çıkar. ONES Technology ve BioAffix markaları birleşir. Ses: Sistemin başlatılması.', 
+                icon: '⍟', // Flat Star/Solution
+                storyboard: 'Kaostan, ONES ve BioAffix logolarının yeşil bir enerji dalgasıyla birleştiği, temiz, keskin bir logo animasyonu çıkar. Tüm ekranı kaplayan güven hissi.'
             },
-            // ESKİ Scene 4 (YENİ Scene 5)
             { 
                 id: 5, 
                 title: 'Tedarik Kapsülü Girişi (Liman)', 
-                description: 'Güneşli, yüksek çözünürlüklü bir liman görüntüsü. Büyük bir kargo gemisi yanaşır. Konteynerler (Un, Şeker) indirilmek üzere sabitlenir. Finansal kaybın, somut yaşam destek ünitelerine dönüştüğü animasyonla gösterilir.', 
-                icon: '⛟',
-                storyboard: 'Deniz kenarındaki modern bir liman. "Un" yazılı devasa konteynerler taşıyan gemi yanaşır. Kameranın açısı, konteynerlere odaklanırken, arka planda kaybolan banknotların ürünlere (Un çuvalı) dönüştüğü soyut bir dönüşüm efekti.'
+                description: 'Güneşli, turkuaz bir deniz kıyısında büyük bir kargo gemisi limana yanaşır. Konteynerler (Un, Şeker) indirilir. Finansal kaybın, somut yaşam destek ünitelerine dönüştüğü animasyonla gösterilir.', 
+                icon: '☍', // Flat Connection/Docking
+                storyboard: 'Deniz kenarındaki modern bir liman. "Un" yazılı devasa konteynerler taşıyan gemi yanaşır. Kaybolan banknotların ürünlere (Un çuvalı) dönüştüğü soyut bir dönüşüm efekti.'
             },
-            // ESKİ Scene 5 (YENİ Scene 6)
             { 
                 id: 6, 
                 title: 'Mobil Otantikasyon: Birinci Kontrol Noktası', 
-                description: 'Liman görevlisi, "BioAffix Vision Mobile" cihazıyla şoförün biyometrik kimliğini ve yüz profilini tarar. Ekranda yeşil, bloklu onay kodu belirir. "Yararlanıcının Biyometrik Doğrulaması Tamamlandı" mesajı.', 
-                icon: '⌭',
-                storyboard: 'Yakın çekim: Geleneksel kıyafetli bir liman yöneticisinin elindeki BioAffix mobil cihazı. Cihaz ekranında şoförün yüzü taranırken yeşil bir biyometrik ızgara belirir. Onaylandıktan sonra yeşil "OK" işareti yanıp söner.'
+                description: 'Liman görevlisi, "BioAffix Vision Mobile" cihazıyla şoförün biyometrik kimliğini ve yüz profilini tarar. Ekranda yeşil onay kodu belirir. "Yararlanıcının Biyometrik Doğrulaması Tamamlandı" mesajı.', 
+                icon: '⌭', // Flat Biometric Scan/Viewfinder
+                storyboard: 'Yakın çekim: Yöneticinin elindeki BioAffix mobil cihazı. Ekranda şoförün yüzü taranırken yeşil bir biyometrik ızgara belirir. Onaylandıktan sonra yeşil "OK" işareti yanıp söner.'
             },
             { 
                 id: 7, 
                 title: 'Dijital İrsaliye Gönderimi', 
                 description: 'Doğrulamanın ardından, cihaz ekranında dijital irsaliye kodu ve yük bilgileri görünür. "Kağıt Protokolü Kapatıldı. Belgeler Dijital Ortama Aktarıldı. Elektronik Envanter Takip Sistemi (EETS) Aktif." vurgusu.', 
-                icon: '⌘',
-                storyboard: 'Mobil cihaz ekranından zoom out. Ekran, karmaşık kağıt yığınlarının hızla dijital bir veri akışına dönüştüğünü gösterir. EETS logosu, bu dijital akışın üzerine yerleşir.'
+                icon: '⎘', // Flat Digital Export/Paper
+                storyboard: 'Mobil cihaz ekranından zoom out. Ekran, kağıt yığınlarının hızla dijital bir veri akışına dönüştüğünü gösterir. EETS logosu, bu dijital akışın üzerine yerleşir.'
             },
-            // ESKİ Scene 7 (YENİ Scene 8)
             { 
                 id: 8, 
                 title: 'Taşıma Vektörünün İzlenmesi', 
-                description: 'Yüklü kamyonlar (taşıma vektörleri) limandan ayrılır. Her kamyonun üzerinde bir GPS sinyali belirir ve merkezi bir haritaya kilitlenir. "Dağıtım Temsilcileri Merkez Kontrol Biriminden Anlık İzleniyor."', 
-                icon: '☗',
-                storyboard: 'Liman çıkış kapısından ayrılan kamyonlar dizisi. Bir uydu sinyali kamyonların üzerinden fırlar ve merkezi bir harita/izleme ekranına bağlanır. Harita üzerinde kamyon simgeleri hareket eder.'
+                description: 'Yüklü kamyonlar limandan ayrılır. Her kamyonun üzerinde bir GPS sinyali belirir ve merkezi bir haritaya kilitlenir. "Dağıtım Temsilcileri Merkez Kontrol Biriminden Anlık İzleniyor."', 
+                icon: '⌖', // Flat Crosshair/Targeting
+                storyboard: 'Liman çıkış kapısından ayrılan kamyonlar dizisi. Bir uydu sinyali kamyonların üzerinden fırlar ve merkezi bir harita/izleme ekranına bağlanır.'
             },
-            // ESKİ Scene 8 (YENİ Scene 9)
             { 
                 id: 9, 
                 title: 'Ana Dağıtım İstasyonu', 
                 description: 'Kamyon konvoyunun, modern ve organize bir merkezi dağıtım deposuna (İstasyon) ulaştığı gösterilir. İstasyonun verimliliği ve kapasitesi vurgulanır.', 
-                icon: '□',
+                icon: '⬟', // Flat Hexagon/Building
                 storyboard: 'Geniş bir açı: Kamyon konvoyunun, temiz ve büyük bir ana depolama tesisine (İstasyon) ulaştığı görseli. Deponun düzenli ve organize yapısı vurgulanır.'
             },
-            // ESKİ Scene 9 (YENİ Scene 10)
             { 
                 id: 10, 
                 title: 'Merkezi Yönetim (MYS) İşleme', 
                 description: 'Kontrol odasındaki büyük ekranda, MYS yazılım arayüzü görünür. "Merkezi Yönetim Sistemi (MYS) ile Vekillere Yönlendirilecek Ürün Miktarları Onaylanıyor. Optimizasyon Hesaplandı." Veri akışı görselleştirilir.', 
-                icon: '◰',
-                storyboard: 'Kontrol odasındaki bir personelin önündeki devasa MYS ekranına yakın çekim. Ekranda, farklı vekil bölgelerine ayrılmış kutucuklara ne kadar ürünün tahsis edildiği bilgisi, yeşil onay tuşlarıyla birlikte belirir.'
+                icon: '⌡', // Flat Integral/Control Panel
+                storyboard: 'Kontrol odasındaki bir personelin önündeki devasa MYS ekranına yakın çekim. Ekranda, farklı vekil bölgelerine tahsis edilen ürün miktarları yeşil onay tuşlarıyla birlikte belirir.'
             },
-            // ESKİ Scene 10 (YENİ Scene 11)
             { 
                 id: 11, 
                 title: 'Güvenli Sevkiyat: Çift Otantikasyon', 
                 description: 'Kamyon şoförü ve sevkiyat memuru, BioAffix cihazına parmak izi/iris taraması yapar. Kimlik doğrulamasının güvenli, iki faktörlü yapısı vurgulanır. Kamyon, onay sonrası yola çıkar.', 
-                icon: '⚵',
-                storyboard: 'Kamyon kabininde, şoför ve memurun sırayla BioAffix cihazına parmak izi okuttuğu yakın çekim. Her iki biyometrik onayın da başarılı olduğunu gösteren yeşil bir siber kilit animasyonu.'
+                icon: '⍾', // Flat Biometric Lock
+                storyboard: 'Kamyon kabininde, şoför ve memurun sırayla BioAffix cihazına parmak izi okuttuğu yakın çekim. Her iki biyometrik onayın da başarılı olduğunu gösteren yeşil bir kilit animasyonu.'
             },
-            // ESKİ Scene 11 (YENİ Scene 12)
             { 
                 id: 12, 
                 title: 'Vekil Terminaline Giriş', 
                 description: 'Kamyon, dar ve canlı şehir sokaklarından geçerek yerel bir vekil noktasına (Dağıtım Terminali) ulaşır. Kentsel doku ile yüksek teknolojinin buluşması.', 
-                icon: '⌂',
-                storyboard: 'Kamyonun geleneksel bir pazar yeri veya mahalle içindeki küçük bir vekil deposuna (market) yaklaştığı dış mekan çekimi. Geleneksel Irak mimarisi ve canlı mahalle hayatı fon olarak kullanılır.'
+                icon: '⌂', // Flat House/Terminal
+                storyboard: 'Kamyonun geleneksel bir pazar yeri veya mahalle içindeki küçük bir vekil deposuna (market) yaklaştığı dış mekan çekimi. Geleneksel Irak mimarisi fon olarak kullanılır.'
             },
-            // ESKİ Scene 12 (YENİ Scene 13)
             { 
                 id: 13, 
                 title: 'Veri Senkronizasyonu (Teslimat Anı)', 
-                description: 'Şoför ve vekil, el cihazlarıyla biyometrik doğrulama yapar. Kimlik, coğrafi konum, saat ve teslim edilen miktar bilgisi (metadata) anında MYS\'ye yüksek hızlı aktarılır.', 
-                icon: '⟳',
-                storyboard: 'Yakın çekim: Vekil ve şoförün biyometrik olarak el cihazlarıyla doğrulanması. Cihazlardan çıkan veri paketlerinin MYS sunucusuna ışınlandığı dinamik bir siber ağ animasyonu.'
+                description: 'Şoför ve vekil, el cihazlarıyla biyometrik doğrulama yapar. Kimlik, coğrafi konum, saat ve teslim edilen miktar bilgisi anında MYS\'ye yüksek hızlı aktarılır.', 
+                icon: '⟳', // Flat Sync/Refresh
+                storyboard: 'Yakın çekim: Vekil ve şoförün biyometrik olarak el cihazlarıyla doğrulanması. Cihazlardan çıkan veri paketlerinin MYS sunucusuna ışınlandığı dinamik bir ağ animasyonu.'
             },
-            // ESKİ Scene 13 (YENİ Scene 14)
             { 
                 id: 14, 
                 title: 'Vekil Envanter Takibi', 
                 description: 'Vekil, BioAffix mobil cihazıyla gelen ürünleri tarar. Ekranda "Vekil Deposundaki Kalan Gıda Malzemeleri Merkezden Anlık İzleniyor" uyarısı. Stok seviyesi grafiği yeşile döner.', 
-                icon: '⊞',
+                icon: '⌁', // Flat Inventory Check
                 storyboard: 'Depo içindeki raflarda duran ürün çuvalları. Vekil, bir çuvalı tararken ekranında stok sayısının güncellendiği görülür. Merkezden izleme paneli, vekilin deposunun stok seviyesini gösterir.'
             },
-            // ESKİ Scene 14 (YENİ Scene 15)
             { 
                 id: 15, 
                 title: 'Vatandaş Bildirimi (SMS)', 
                 description: 'Vatandaşın elindeki akıllı telefona bir bildirim gelir: "Gıda yardım paketiniz Terminalde hazır." Vatandaşın yüzündeki heyecan. Hız ve kesinlik vurgulanır.', 
-                icon: '⌹',
-                storyboard: 'Vatandaşın elindeki telefona gelen Arapça SMS bildirimi. Vatandaşın yüzünde tebessüm belirir. Telefon ekranında "Hazır" yazısı parlar.'
+                icon: '⌂', // Flat Phone/Message Box
+                storyboard: 'Vatandaşın elindeki telefona gelen Arapça SMS bildirimi. Vatandaşın yüzünde tebessüm belirir.'
             },
-            // ESKİ Scene 15 (YENİ Scene 16)
             { 
                 id: 16, 
                 title: 'Vatandaş Kimlik Doğrulaması', 
-                description: 'Vatandaş, kimlik kartını BioAffix cihazına okutur. Holografik ekranda, tüm aile üyelerinin (hak sahipleri) bilgileri, birey bazında detaylarla belirir.', 
-                icon: '⌬',
-                storyboard: 'Vatandaşın kimlik kartını BioAffix cihazına okuttuğu an. Cihazın ekranında ailenin tüm üyelerinin (büyükanne, ev reisi vb.) fotoğrafları ve tahsis bilgileri pop-up şeklinde görünür.'
+                description: 'Vatandaş, kimlik kartını BioAffix cihazına okutur. Ekranda, tüm aile üyelerinin (hak sahipleri) bilgileri, birey bazında detaylarla belirir.', 
+                icon: '⊚', // Flat Identity/Individual
+                storyboard: 'Vatandaşın kimlik kartını BioAffix cihazına okuttuğu an. Cihazın ekranında ailenin tüm üyelerinin fotoğrafları ve tahsis bilgileri pop-up şeklinde görünür.'
             },
-            // ESKİ Scene 16 (YENİ Scene 17)
             { 
                 id: 17, 
                 title: 'Doğru Alokasyon ve Teslimat', 
                 description: 'Sistem onayı sonrası vekil, tam miktarda ürünü vatandaşa teslim eder. Vatandaşın yüzündeki memnuniyet ve güven yansıması. Hata payı sıfır.', 
-                icon: '⎱',
-                storyboard: 'Vekil, vatandaşa (örneğin bir çuval un) teslim ederken samimi bir gülümseme. Kamera, ürünün çuvalındaki etiketi ve doğru miktarı gösterir. Hata payının sıfırlandığına dair bir metin animasyonu.'
+                icon: '⎱', // Flat Delivery/Transfer
+                storyboard: 'Vekil, vatandaşa (örneğin bir çuval un) teslim ederken samimi bir gülümseme. Hata payının sıfırlandığına dair bir metin animasyonu.'
             },
-            // ESKİ Scene 17 (YENİ Scene 18)
             { 
                 id: 18, 
                 title: 'Vatandaş Onayı: Biyometrik Güvenlik', 
                 description: 'Vatandaş, parmak izini okutarak teslimatı bizzat onaylar. "Vatandaş, Alacağını Tam Olarak Biliyor ve Biyometrik Olarak Onaylıyor." Şeffaflık maksimumda.', 
-                icon: '✔',
-                storyboard: 'Yakın çekim: Vatandaşın parmak izini BioAffix cihazına yerleştirdiği an. Ekranda büyük, yeşil bir onay işareti belirir. Onayın mühürlendiği efekti.'
+                icon: '✓', // Flat Checkmark/Confirm
+                storyboard: 'Yakın çekim: Vatandaşın parmak izini BioAffix cihazına yerleştirdiği an. Ekranda büyük, yeşil bir onay işareti belirir.'
             },
-            // ESKİ Scene 18 (YENİ Scene 19)
             { 
                 id: 19, 
                 title: 'İşlem Tamam: Geri Bildirim', 
                 description: 'Vatandaş depodan ayrılırken cep telefonuna final SMS bildirimi gelir: "Teslimatınız başarıyla tamamlanmıştır. Teşekkür ederiz." Vatandaş Memnuniyet Düzeyi (VMD) sinyali yükselir.', 
-                icon: '⊕',
+                icon: '⍰', // Flat Notification/Alert
                 storyboard: 'Teslimatını alan vatandaşın dışarı çıktığı an. Telefonuna gelen son SMS bildirimi. VMD (Vatandaş Memnuniyet Düzeyi) barının hızla yeşile yükseldiği animasyonu.'
             },
-            // ESKİ Scene 19 (YENİ Scene 20)
             { 
                 id: 20, 
                 title: 'Memnuniyet Dalgası (Toplumsal Etki)', 
                 description: 'Gülümseyen vatandaştan yayılan "Mutluluk Sinyalleri" (kalpler), Foodstuff, Ticaret Bakanlığı ve Başbakanlık merkezlerine ulaşır. Tüm Irak\'ı saran pozitif etki görseli.', 
-                icon: '∢',
-                storyboard: 'Vatandaşın yüzünden fışkıran siber kalplerin, Irak haritası üzerinde hızla yayılarak Foodstuff ve Bakanlık binalarına ulaştığı dinamik bir harita animasyonu. Ülke genelinde artan güven.'
+                icon: '⋇', // Flat Spread/Positive Influence
+                storyboard: 'Vatandaşın yüzünden fışkıran kalplerin, Irak haritası üzerinde hızla yayılarak Foodstuff ve Bakanlık binalarına ulaştığı dinamik bir harita animasyonu.'
             },
-            // ESKİ Scene 20 (YENİ Scene 21)
             { 
                 id: 21, 
                 title: 'Ekip Birleşimi: Koruyucular', 
                 description: 'Projenin tüm paydaşları (Liman memuru, şoför, vekil, vatandaş) bir araya gelir. Hepsi Irak\'ın finansal servetini ve halkın güvenini korudukları için gururlu bir duruş sergiler.', 
-                icon: '★',
+                icon: '⍙', // Flat Union/Team
                 storyboard: 'Farklı görevlerdeki tüm kilit figürlerin (memur, şoför, vekil, vatandaş) yan yana durduğu, gururlu bir ekip fotoğrafı karesi. Arkada Irak bayrağı hafifçe dalgalanır.'
             },
-            // ESKİ Scene 21 (YENİ Scene 22)
             { 
                 id: 22, 
                 title: 'Merkezi Entegrasyon Matrisi', 
                 description: 'Havadan bir görünümle MYS\'nin tüm BioAffix cihazları ve kritik veri kaynakları (NVİ, İçişleri Bakanlığı) ile sürekli veri alışverişinde bulunduğu bir "Ağ Haritası" gösterilir. Tam kontrol vurgusu.', 
-                icon: '⧈',
-                storyboard: 'MYS ekranının karmaşık bir haritası: Limanlar, depolar ve vekillerdeki BioAffix cihazlarından gelen veri akışları ile NVİ ve İçişleri Bakanlığı veri tabanları arasındaki çift yönlü siber bağlantılar gösterilir.'
+                icon: '⧈', // Flat Grid/Matrix
+                storyboard: 'MYS ekranının karmaşık bir haritası: Limanlar, depolar ve vekillerdeki BioAffix cihazlarından gelen veri akışları ile NVİ ve İçişleri Bakanlığı veri tabanları arasındaki çift yönlü bağlantılar gösterilir.'
             },
-            // ESKİ Scene 22 (YENİ Scene 23)
             { 
                 id: 23, 
                 title: 'Finansal Geri Kazanım', 
-                description: 'Daha önce kaybolan data paketleri/banknotlar, bu kez bir "Hazine Kasası"na güvenle akarken gösterilir. "Yeni Sistem Yüz Milyonlarca Dolar Tasarruf Sağlıyor" metni yeşil renkte yanıp söner.', 
-                icon: '⌸',
-                storyboard: 'Kaybolmayan banknotların, şeffaf bir kanaldan hızla devlete ait bir siber kasaya aktığı animasyon. Kasanın üzerinde büyük, yeşil harflerle "TASARRUF: Yüz Milyonlarca Dolar" yazar.'
+                description: 'Daha önce kaybolan banknotlar, bu kez bir "Hazine Kasası"na güvenle akarken gösterilir. "Yeni Sistem Yüz Milyonlarca Dolar Tasarruf Sağlıyor" metni yeşil renkte yanıp söner.', 
+                icon: '⌸', // Flat Vault/Secure Storage
+                storyboard: 'Kaybolmayan banknotların, şeffaf bir kanaldan hızla devlete ait bir kasaya aktığı animasyon. Kasanın üzerinde büyük, yeşil harflerle "TASARRUF: Yüz Milyonlarca Dolar" yazar.'
             },
-            // ESKİ Scene 23 (YENİ Scene 24)
             { 
                 id: 24, 
                 title: 'Final Kodlama: Marka Tanıtımı', 
-                description: 'Ekran, karanlık bir arayüzde merkezlenir. ONES Technology ve BioAffix logoları, parlak bir siber etkiyle belirir. Slogan: "Güvenli Teslimat, Bereketli Sofralar - Teknoloji ile Güven İnşa Ediyoruz."', 
-                icon: '⋉',
-                storyboard: 'Siyah bir fona karşı, ONES Technology ve BioAffix logolarının siber-yeşil ve mavi parıltılarla belirginleştiği şık bir logo animasyonu. Slogan, logoların altında net ve vurgulu bir şekilde ortaya çıkar.'
+                description: 'Ekran, koyu bir arayüzde merkezlenir. ONES Technology ve BioAffix logoları, parlak bir etkiyle belirir. Slogan: "Güvenli Teslimat, Bereketli Sofralar - Teknoloji ile Güven İnşa Ediyoruz."', 
+                icon: '⋉', // Flat Logo/Product
+                storyboard: 'Siyah bir fona karşı, ONES Technology ve BioAffix logolarının parlak efektlerle belirginleştiği şık bir logo animasyonu. Slogan, logoların altında net ve vurgulu bir şekilde ortaya çıkar.'
             },
-            // ESKİ Scene 24 (YENİ Scene 25)
             { 
                 id: 25, 
                 title: 'Kapanış Protokolü ve İletişim', 
-                description: 'Logoların altında bir QR kodu ve iletişim kanalları (URL, İletişim Hattı) belirir. Arka planda sönen-açılan dijital ağ hatları animasyonu ile sunum sonlanır.', 
-                icon: '⎊',
-                storyboard: 'Ekranın ortasında logolar, altında büyük bir QR kodu ve iletişim bilgileri. Arka planda yavaşça hareket eden, konsol temasına uygun siber çizgiler ve data akışları. Müzik yavaşça biter.'
+                description: 'Logoların altında bir QR kodu ve iletişim kanalları (URL, İletişim Hattı) belirir. Arka planda yavaşça hareket eden dijital ağ hatları animasyonu ile sunum sonlanır.', 
+                icon: '⎚', // Flat Exit/Finish
+                storyboard: 'Ekranın ortasında logolar, altında büyük bir QR kodu ve iletişim bilgileri. Arka planda yavaşça hareket eden siber çizgiler ve data akışları.'
             }
         ];
-
-        const navigation = document.getElementById('scene-navigation').querySelector('ul');
-        const detailsContainer = document.getElementById('scene-details');
-
+        
+        // --- Uygulama Mantığı ---
+        
         function renderContent() {
-            // Navigasyon (MISSION LOG) içeriğini doldur
+            const navigation = document.getElementById('scene-navigation').querySelector('ul');
+            const detailsContainer = document.getElementById('scene-details');
+
+            if (!navigation || !detailsContainer) {
+                 console.error("HATA: DOM elemanlarına erişilemiyor (navigation veya detailsContainer null).");
+                 return;
+            }
+
+            document.querySelectorAll('.correction-area label span').forEach(span => {
+                 span.textContent = window.userId || 'Yükleniyor...';
+            });
+
+            // Navigasyon (MİSYON AKIŞI) içeriğini doldur
             navigation.innerHTML = scenes.map(scene => `
                 <li>
-                    <a href="#scene-${scene.id}" data-scene-id="${scene.id}" class="scene-link flex items-center p-3 rounded-lg hover:bg-cyan-900 transition-all duration-300 border-l-4 border-transparent hover:border-cyan-700">
-                        <span class="mr-3 flat-icon">${scene.icon}</span>
-                        <span class="font-medium text-sm console-font">${scene.id}. ${scene.title}</span>
+                    <a href="#scene-${scene.id}" data-scene-id="${scene.id}" class="nav-link scene-link flex items-center p-3 rounded-lg transition-all duration-300 border-l-4 border-transparent">
+                        <span class="mr-3 flat-icon scene-icon">${scene.icon}</span>
+                        <span class="font-medium text-sm">${scene.id}. ${scene.title}</span>
                     </a>
                 </li>
             `).join('');
 
-            // Detaylar (DATA TERMINAL) içeriğini doldur
+            // Detaylar (SENARYO KONTROL) içeriğini doldur
             detailsContainer.innerHTML = scenes.map(scene => `
-                <section id="scene-${scene.id}" class="scene-card bg-console-dark p-6 rounded-xl shadow-2xl">
-                    <h3 class="text-xl md:text-3xl font-bold mb-4 text-lime-accent flex items-center console-font border-b border-cyan-800 pb-2">
-                        <span class="mr-4 flat-icon text-neon">${scene.icon}</span>
-                        SEGMENT ${scene.id}: ${scene.title.toUpperCase()}
-                    </h3>
+                <section id="scene-${scene.id}" class="scene-card p-6 rounded-lg shadow-xl mb-8">
+                    <div class="flex items-center justify-between border-b border-gray-700 pb-3 mb-4">
+                        <h3 class="text-xl md:text-2xl font-bold text-[var(--color-primary)] futuristic-title flex items-center">
+                            <span class="mr-3 flat-icon scene-icon">${scene.icon}</span>
+                            SEGMENT ${scene.id}: ${scene.title.toUpperCase()}
+                        </h3>
+                        <span class="text-xs text-gray-400">Önerilen Süre: 3.5 - 4.5 sn</span>
+                    </div>
                     
-                    <p class="text-cyan-300 text-base md:text-lg leading-relaxed pt-2">${scene.description}</p>
+                    <div class="description-area mb-6">
+                        <h4 class="font-semibold text-gray-300 mb-1 border-b border-gray-700">METİN & İÇERİK:</h4>
+                        <p class="text-gray-400 text-base leading-relaxed pl-2">${scene.description}</p>
+                    </div>
 
-                    <div class="storyboard-note">
-                        <h4 class="font-bold text-lime-accent mb-1">GÖRSEL NOT (STORYBOARD):</h4>
-                        <p class="text-sm">${scene.storyboard}</p>
+                    <div class="storyboard-area p-4 rounded-lg mb-6">
+                        <h4 class="font-semibold text-gray-300 mb-1 border-b border-gray-700">GÖRSEL NOT (STORYBOARD):</h4>
+                        <p class="text-sm text-gray-400 pl-2">${scene.storyboard}</p>
                     </div>
 
                     <!-- Revizyon ve Düzeltme Notu Alanı -->
-                    <div class="correction-area">
-                        <label for="notes-${scene.id}" class="block text-sm font-bold text-lime-accent mb-2 console-font">REVİZYON KONSOLU (Düzeltme Notları):</label>
-                        <textarea id="notes-${scene.id}" rows="4" class="w-full p-3 bg-gray-900 border border-cyan-700 text-cyan-200 rounded-lg focus:ring-lime-accent focus:border-lime-accent" placeholder="Buraya animasyon, metin veya süre ile ilgili düzeltme/ekleme notlarınızı giriniz..."></textarea>
+                    <div class="correction-area p-4 border border-gray-700 rounded-lg">
+                        <label for="notes-${scene.id}" class="block text-sm font-semibold text-[var(--color-secondary)] mb-2">REVİZYON KONSOLU (Düzeltme Notları - Kullanıcı ID: <span class="text-[var(--color-primary)]">${window.userId || 'Yükleniyor...'}</span>):</label>
+                        <textarea id="notes-${scene.id}" rows="4" class="w-full p-3 rounded-lg focus:ring-[var(--color-secondary)] focus:border-[var(--color-secondary)] transition-all" placeholder="Buraya animasyon, metin veya süre ile ilgili düzeltme/ekleme notlarınızı giriniz..." oninput="document.getElementById('save-btn-${scene.id}').disabled = this.value.trim() === ''"></textarea>
+                        <div class="mt-3 flex justify-end items-center space-x-3">
+                            <span id="status-${scene.id}" class="hidden text-sm font-semibold"></span>
+                            <button id="save-btn-${scene.id}" onclick="saveNote(${scene.id})" disabled class="bg-[var(--color-secondary)] hover:bg-green-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition-all duration-300 disabled:opacity-50">
+                                Notu Kaydet
+                            </button>
+                        </div>
                     </div>
 
                 </section>
             `).join('');
+
+            scenes.forEach(scene => {
+                window.loadNote(scene.id);
+            });
         }
 
         function handleNavigation(e) {
@@ -393,9 +474,7 @@
             const targetScene = document.getElementById(`scene-${sceneId}`);
 
             if (targetScene) {
-                // Smooth scroll ve URL'i güncelleme
                 targetScene.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // URL'i güncelle (tarayıcı geçmişini kirletmeden)
                 history.replaceState(null, '', `#scene-${sceneId}`);
                 updateActiveLink(sceneId);
             }
@@ -405,36 +484,31 @@
              document.querySelectorAll('.scene-link').forEach(l => {
                 const isActive = l.dataset.sceneId === sceneId;
                 l.classList.toggle('active-scene-link', isActive);
-                l.classList.toggle('border-transparent', !isActive);
-                l.classList.toggle('hover:border-cyan-700', !isActive);
-                l.classList.toggle('hover:bg-cyan-900', !isActive);
-                
-                const icon = l.querySelector('.flat-icon');
-                if (icon) {
-                    icon.style.color = isActive ? '#ccff00' : '#00ffff'; 
-                }
+                l.querySelector('.scene-icon').classList.toggle('active', isActive);
             });
         }
 
-        // Sayfa yüklendiğinde mevcut URL hash'ine göre başlangıç durumunu ayarlar
         function setInitialState() {
             const hash = window.location.hash;
             if (hash && hash.startsWith('#scene-')) {
                 const sceneId = hash.replace('#scene-', '');
                 updateActiveLink(sceneId);
-                // İlk yüklemede animasyonsuz kaydırma
                 document.getElementById(hash)?.scrollIntoView({ behavior: 'auto', block: 'start' });
             } else if (scenes.length > 0) {
                  updateActiveLink(scenes[0].id.toString());
             }
         }
         
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            
+            await window.initializeFirebase();
             renderContent();
-            navigation.addEventListener('click', handleNavigation);
+            
+            const navigationElement = document.getElementById('scene-navigation').querySelector('ul');
+            
+            navigationElement.addEventListener('click', handleNavigation);
             setInitialState();
 
-            // Scroll esnasında aktif linki güncelleyen Intersection Observer
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -442,12 +516,40 @@
                         updateActiveLink(sceneId);
                     }
                 });
-            }, { rootMargin: "-40% 0px -60% 0px", threshold: 0 }); // Hedef ekranın ortasında olduğunda tetikle
+            }, { rootMargin: "-30% 0px -70% 0px", threshold: 0 }); 
 
             document.querySelectorAll('.scene-card').forEach(card => {
                 observer.observe(card);
             });
         });
     </script>
+</head>
+<body class="min-h-screen">
+    
+    <header class="bg-gray-900 text-white p-4 shadow-2xl sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-[var(--color-secondary)] futuristic-title">BASS MOTION GRAPHIC SENARYO</h1>
+            <span class="text-sm font-light text-gray-400 hidden sm:block">ÜRETİM KONTROL PANELİ | ONES & BIOAFFIX</span>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-4 lg:flex lg:space-x-8">
+
+        <!-- Sol Menü: MİSYON AKIŞI (Navigasyon) -->
+        <nav id="scene-navigation" class="w-full lg:w-1/4 mb-4 lg:mb-0 bg-gray-900 shadow-2xl rounded-lg p-4">
+            <h2 class="text-lg font-bold text-[var(--color-primary)] border-b border-gray-700 pb-2 mb-4 futuristic-title">MİSYON AKIŞI</h2>
+            <ul class="space-y-1">
+                <!-- Navigasyon JS ile doldurulacak -->
+            </ul>
+        </nav>
+
+        <!-- Sağ İçerik: SENARYO KONTROL (Detaylar ve Notlar) -->
+        <div id="scene-details" class="w-full lg:w-3/4">
+            <h2 class="text-2xl font-bold text-[var(--color-primary)] mb-6 futuristic-title">SENARYO KONTROL VE REVİZYON</h2>
+            <!-- Detaylar JS ile doldurulacak -->
+        </div>
+
+    </main>
+
 </body>
 </html>
