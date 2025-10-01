@@ -142,10 +142,12 @@
             const statusIndicator = document.getElementById(`status-${sceneId}`);
             const noteText = noteTextarea.value.trim();
 
+            // *** Düzeltme: Oturum açma mesajı daha açıklayıcı hale getirildi. ***
             if (!window.db || !window.userId || window.userId.includes('anon_local')) {
-                statusIndicator.textContent = "Kaydedilemiyor: Oturum Açma Gerekli.";
+                statusIndicator.textContent = "Kaydedilemiyor: Anonim/Çevrimdışı Mod (Veri Kalıcı Kaydedilmez).";
                 statusIndicator.classList.remove('hidden', 'text-[var(--color-secondary)]');
                 statusIndicator.classList.add('text-red-500');
+                saveButton.disabled = true; // Anonim modda kaydetme butonunu devre dışı bırak
                 return;
             }
 
@@ -195,7 +197,7 @@
             if (!noteTextarea) return;
 
             if (!window.db || !window.userId || window.userId.includes('anon_local')) {
-                noteTextarea.value = "Çevrimdışı Mod: Notlar kalıcı olarak kaydedilemez.";
+                noteTextarea.value = "Çevrimdışı Mod: Notlar kalıcı olarak kaydedilemez. Lütfen Notu Kaydet butonuna basmayı deneyin.";
                 return;
             }
 
@@ -324,7 +326,7 @@
                 id: 15, 
                 title: 'Vatandaş Bildirimi (SMS)', 
                 description: 'Vatandaşın elindeki akıllı telefona bir bildirim gelir: "Gıda yardım paketiniz Terminalde hazır." Vatandaşın yüzündeki heyecan. Hız ve kesinlik vurgulanır.', 
-                icon: '⌂', // Flat Phone/Message Box
+                icon: '⍰', // Flat Notification/Alert
                 storyboard: 'Vatandaşın elindeki telefona gelen Arapça SMS bildirimi. Vatandaşın yüzünde tebessüm belirir.'
             },
             { 
@@ -410,6 +412,7 @@
                  return;
             }
 
+            // *** Düzeltme: Kullanıcı ID'sini güncelleyen kısmı tekrar çalıştır ***
             document.querySelectorAll('.correction-area label span').forEach(span => {
                  span.textContent = window.userId || 'Yükleniyor...';
             });
